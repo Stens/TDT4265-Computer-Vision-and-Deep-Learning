@@ -2,6 +2,9 @@ import numpy as np
 import utils
 np.random.seed(1)
 
+# Are we allowed to create separate functions outside the pre defined funcs?
+def normalize(x,x_min=0,x_max = 255) -> int:
+    return 2*((float(x-x_min)) / x_max - x_min) -1  
 
 def pre_process_images(X: np.ndarray):
     """
@@ -12,8 +15,17 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
-    # TODO implement this function (Task 2a)
-    return X
+    
+    batch_size = X.shape[0]
+    # Normalize each pixel value 
+    for i in range(batch_size):
+        for j in range(a[i].shape[0]):
+            a[i][j] = normalize(a[i][j])
+
+    # Add bias trick
+    bias = np.array([[1]*batch_size])
+
+    return np.concatenate((X,bias.T),axis=1)   
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
