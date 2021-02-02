@@ -2,9 +2,11 @@ import numpy as np
 import utils
 np.random.seed(1)
 
+
+
 # Are we allowed to create separate functions outside the pre defined funcs?
 def normalize(x,x_min=0,x_max = 255) -> int:
-    return 2*((float(x-x_min)) / x_max - x_min) -1  
+    return (2*((float(x-x_min)) / x_max - x_min)) -1  
 
 def pre_process_images(X: np.ndarray):
     """
@@ -17,16 +19,17 @@ def pre_process_images(X: np.ndarray):
         f"X.shape[1]: {X.shape[1]}, should be 784"
     
     batch_size = X.shape[0]
+    empty_vec = [None]*X.shape[1] # We know that it is 784 becuase it passed the assertion test
+    new_matrix = np.array([empty_vec]*batch_size)
     # Normalize each pixel value 
     for i in range(batch_size):
-        for j in range(a[i].shape[0]):
-            a[i][j] = normalize(a[i][j])
+        for j in range(X[i].shape[0]):
+            new_matrix[i][j] = normalize(X[i,j])
 
     # Add bias trick
     bias = np.array([[1]*batch_size])
 
-    return np.concatenate((X,bias.T),axis=1)   
-
+    return np.concatenate((new_matrix,bias.T),axis=1)   
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     """
@@ -36,16 +39,26 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     Returns:
         Cross entropy error (float)
     """
-    # TODO implement this function (Task 2a)
+
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return 0
 
+    # TODO implement this function (Task 2a)
+    batch_size = targets.shape[0]
+    losses = []
+    for i in range(batch_size):
+        y_hat = outputs[i][0]
+        y = targets[i][0]
+        c_n = -(y*np.log(y_hat) + (1-y) * np.log(1-y_hat))
+        losses.append(c_n)
+    return np.mean(losses)
+    #C = -(targets*np.log(outputs) + (1 - targets) * np.log(1-outputs))
+    #return np.mean(C)
 
 class BinaryModel:
     def __init__(self):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.w = np.zeros((self.I, 1))
         self.grad = None
 
@@ -56,24 +69,38 @@ class BinaryModel:
         Returns:
             y: output of model with shape [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
-        return None
+        
+        batch_size = X.shape[0]
+        empty_vec = [None]
+        output = np.array([empty_vec]*batch_size)
+        
+        for i in range(X.shape[0]):
+            img_vector = X[i]
+
+            dot_product = (self.w.T).dot(img_vector)
+            probability = (1.0) / (1 + (np.exp(-float(dot_product))))
+
+            output[i] = probability
+        #print("Output shape from forward is: ", output.shape)
+        return output
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
-        Computes the gradient and saves it to the variable self.grad
+        Computes the gradient and saves it to the variable self.grad    
         Args:
             X: images of shape [batch size, 785]
             outputs: outputs of model of shape: [batch size, 1]
             targets: labels/targets of each image of shape: [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
+        # TODO implement this function (Task 2a) 
+        batch_size = X.shape[0]
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
-        self.grad = np.zeros_like(self.w)
+        self.grad = - ((targets-outputs).reshape(batch_size) @ X).reshape(X.shape[1],1)/batch_size
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
+    
     def zero_grad(self) -> None:
         self.grad = None
 
