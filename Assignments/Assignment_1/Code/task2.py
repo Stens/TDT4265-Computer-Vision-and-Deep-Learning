@@ -5,6 +5,7 @@ from task2a import cross_entropy_loss, BinaryModel, pre_process_images
 from trainer import BaseTrainer
 np.random.seed(0)
 
+
 def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -> float:
     """
     Args:
@@ -14,12 +15,13 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     Returns:
         Accuracy (float)
     """
-
-    # TODO Implement this function (Task 2c)
-    accuracy = 0.0
+    predictions = (model.forward(X) >= 0.5)
+    accuracy = np.count_nonzero(predictions == targets)/X.shape[0]
     return accuracy
 
+
 class LogisticTrainer(BaseTrainer):
+
     def train_step(self, X_batch: np.ndarray, Y_batch: np.ndarray):
         """
         Perform forward, backward and gradient descent step here.
@@ -32,12 +34,10 @@ class LogisticTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
-        batch_size = X_batch.shape[0]
-        for i in range(batch_size):
-            pass
-
-        # TODO: Implement this function (task 2b)
-        loss = 0
+        out = self.model.forward(X_batch)
+        self.model.backward(X_batch, out, Y_batch)
+        self.model.w -= self.model.grad*self.learning_rate
+        loss = cross_entropy_loss(Y_batch, out)
         return loss
 
     def validation_step(self):
@@ -63,7 +63,7 @@ class LogisticTrainer(BaseTrainer):
 
 if __name__ == "__main__":
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 50
+    num_epochs = 500  # Changed from 50 to 500
     learning_rate = 0.05
     batch_size = 128
     shuffle_dataset = False
