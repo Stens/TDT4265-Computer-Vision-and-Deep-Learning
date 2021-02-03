@@ -5,7 +5,6 @@ from task2a import cross_entropy_loss, BinaryModel, pre_process_images
 from trainer import BaseTrainer
 np.random.seed(0)
 
-
 def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -> float:
     """
     Args:
@@ -15,13 +14,12 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     Returns:
         Accuracy (float)
     """
+
     # TODO Implement this function (Task 2c)
     accuracy = 0.0
     return accuracy
 
-
 class LogisticTrainer(BaseTrainer):
-
     def train_step(self, X_batch: np.ndarray, Y_batch: np.ndarray):
         """
         Perform forward, backward and gradient descent step here.
@@ -34,6 +32,10 @@ class LogisticTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
+        batch_size = X_batch.shape[0]
+        for i in range(batch_size):
+            pass
+
         # TODO: Implement this function (task 2b)
         loss = 0
         return loss
