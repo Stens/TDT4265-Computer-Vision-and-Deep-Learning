@@ -17,7 +17,8 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
-    
+
+    """ Task 3 liker ikke denne..?
     batch_size = X.shape[0]
     empty_vec = [None]*X.shape[1] # We know that it is 784 becuase it passed the assertion test
     new_matrix = np.array([empty_vec]*batch_size)
@@ -29,7 +30,14 @@ def pre_process_images(X: np.ndarray):
     # Add bias trick
     bias = np.array([[1]*batch_size])
 
-    return np.concatenate((new_matrix,bias.T),axis=1)   
+    return np.concatenate((new_matrix,bias.T),axis=1)
+    """
+    new_X = np.zeros((X.shape[0], X.shape[1]+1))
+    for i, batch in enumerate(X):
+        new_X[i, :-1] = ((batch/255.0)*2.0)-1.0
+    new_X[:, -1] = 1.0
+    return new_X
+       
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     """
@@ -96,7 +104,9 @@ class BinaryModel:
         batch_size = X.shape[0]
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
-        self.grad = - ((targets-outputs).reshape(batch_size) @ X).reshape(X.shape[1],1)/batch_size
+        #self.grad = - ((targets-outputs).reshape(batch_size) @ X).reshape(X.shape[1],1)/batch_size
+        self.grad = (-(targets - outputs).reshape(batch_size)@ X).reshape(X.shape[1], 1)/batch_size
+        
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
