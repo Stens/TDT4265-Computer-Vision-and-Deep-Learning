@@ -71,19 +71,20 @@ if __name__ == "__main__":
     learning_rate = 0.01
     batch_size = 128
     shuffle_dataset = True
-
+    show_plots = False
     # Load dataset
     X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
     X_train = pre_process_images(X_train)
     X_val = pre_process_images(X_val)
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)
-
     # ANY PARTS OF THE CODE BELOW THIS CAN BE CHANGED.
 
     # Train a model with L2 regularization (task 4b)
     # l2_lambdas = [0]
     l2_lambdas = [1, .1, .01, .001, 0]
+    norms = []
+
     for l in l2_lambdas:
         # Intialize model
         model = SoftmaxModel(l)
@@ -109,10 +110,13 @@ if __name__ == "__main__":
         plt.legend()
         plt.xlabel("Number of Training Steps")
         plt.ylabel("Cross Entropy Loss - Average")
-        # plt.savefig("task4_softmax_train_loss.png")
-        plt.savefig("task3b_softmax_train_loss.png")
 
-        plt.show()
+        # plt.savefig("task3b_softmax_train_loss.png")
+        plt.savefig("task4_softmax_train_loss_"+str(l)+"_.png")
+        if show_plots:
+            plt.show()
+        else:
+            plt.close()
 
         # Plot accuracy
         plt.ylim([0.89, .93])
@@ -122,18 +126,30 @@ if __name__ == "__main__":
         plt.ylabel("Accuracy")
         plt.legend()
         # plt.savefig("task3b_softmax_train_accuracy.png")
-        plt.savefig("task4c_l2_reg_accuracy.png")
-        plt.show()
+        plt.savefig("task4c_l2_reg_accuracy_"+str(l)+"_.png")
+        if show_plots:
+            plt.show()
+        else:
+            plt.close()
         # Plotting of softmax weights (Task 4b)
         image_weights = model.w[:-1, :]
         image_weights = image_weights.reshape(28, 28, 10)
         for i in range(10):
             plt.imshow(image_weights[:, :, i], cmap="gray")
-            plt.savefig("task4b_softmax_weight.png", cmap="gray")
-            plt.show()
+            plt.savefig("task4b_softmax_weight_"+str(i) +
+                        "_"+str(l)+"_.png")
+            if show_plots:
+                plt.show()
+            else:
+                plt.close()
 
         # Plotting of accuracy for difference values of lambdas (task 4c)
 
         # Task 4d - Plotting of the l2 norm for each weight
-
-        plt.savefig("task4d_l2_reg_norms.png")
+        norms.append(np.linalg.norm(model.w))
+    plt.plot(l2_lambdas, norms)
+    plt.title("Plot of length of $\omega$ vs $\lambda$")
+    plt.xlabel("$\lambda$")
+    plt.ylabel("||$\omega$||^2")
+    plt.show()
+    plt.savefig("task4d_l2_reg_norms.png")

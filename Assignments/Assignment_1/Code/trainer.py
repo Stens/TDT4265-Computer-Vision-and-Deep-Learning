@@ -26,7 +26,7 @@ class BaseTrainer:
         self.model = model
         self.shuffle_dataset = shuffle_dataset
 
-        self.stop_at_count = 100
+        self.stop_at_count = 10
 
     def validation_step(self):
         """
@@ -93,14 +93,12 @@ class BaseTrainer:
                     val_history["accuracy"][global_step] = accuracy_val
 
                     if self.stop_at_count:
-                        losses = np.array(list(val_history["loss"].values()))
                         # No improvement
-                        if prev_best_loss < losses.all():
+                        if prev_best_loss < val_loss:
                             counter += 1
                         else:
                             counter = 0
-                            prev_best_loss = np.min(losses)
-
+                            prev_best_loss = val_loss
                         # We have reached max number of passes trough dataset without improvement
                         if counter == self.stop_at_count:
                             print(
