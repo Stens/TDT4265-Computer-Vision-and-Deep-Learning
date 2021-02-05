@@ -33,6 +33,7 @@ if __name__ == "__main__":
     for l in l2_lambdas:
         # Intialize model
         model = SoftmaxModel(l)
+
         # Train model
         trainer = SoftmaxTrainer(
             model, learning_rate, batch_size, shuffle_dataset,
@@ -55,8 +56,7 @@ if __name__ == "__main__":
         image_weights = image_weights.reshape(28, 28, 10)
         for i in range(10):
             plt.imshow(image_weights[:, :, i], cmap="gray")
-            # plt.savefig("task4b_softmax_weight_"+str(i) +
-            #             "_"+str(l)+"_.png")
+            plt.savefig("task4b_softmax_weight_"+str(i) + "_"+str(l)+"_.png")
             if show_plots:
                 plt.show()
             else:

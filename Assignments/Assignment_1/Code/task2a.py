@@ -2,7 +2,6 @@ import numpy as np
 import utils
 np.random.seed(1)
 
-
 def pre_process_images(X: np.ndarray):
     """
     Args:
@@ -13,7 +12,11 @@ def pre_process_images(X: np.ndarray):
 
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
+    
+    # Initializing with 784 + 1 zeros. The +1 is to include the "bias trick"
     new_X = np.zeros((X.shape[0], X.shape[1]+1))
+
+    # For each pixel in each image we normalize the pixel value between [-1,1], and add a 1 to include the bias trick
     for i, batch in enumerate(X):
         new_X[i, :-1] = ((batch/255.0)*2.0)-1.0
     new_X[:, -1] = 1.0
@@ -28,7 +31,6 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     Returns:
         Cross entropy error (float)
     """
-    N = targets.shape[0]
     result = np.mean(-1*(targets*np.log(outputs) +
                          (1 - targets)*np.log(1-outputs)))
 
@@ -39,7 +41,6 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
 
 
 class BinaryModel:
-
     def __init__(self):
         # Define number of input nodes
         self.I = 785
@@ -67,8 +68,9 @@ class BinaryModel:
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
-        batch_size = targets.shape[0]
 
+        batch_size = targets.shape[0]
+        
         self.grad = (-(targets - outputs).reshape(batch_size)
                      @ X).reshape(X.shape[1], 1)/batch_size
 

@@ -16,16 +16,15 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
     Returns:
         Accuracy (float)
     """
-
-    num_classes = targets.shape[1]
+    # Creating vector of predictions (1 or 0)
     predictions = np.argmax(model.forward(X), axis=1)
-    accuracy = np.count_nonzero(
-        predictions == np.argmax(targets, axis=1))/X.shape[0]
+    
+    # Counting everytime prediction equals target. Then divding by batch size
+    accuracy = np.count_nonzero(predictions == np.argmax(targets, axis=1))/X.shape[0]
     return accuracy
 
 
 class SoftmaxTrainer(BaseTrainer):
-
     def train_step(self, X_batch: np.ndarray, Y_batch: np.ndarray):
         """
         Perform forward, backward and gradient descent step here.
@@ -67,7 +66,7 @@ class SoftmaxTrainer(BaseTrainer):
 
 if __name__ == "__main__":
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 500
+    num_epochs = 500 # Changed from 50 to 500
     learning_rate = 0.01
     batch_size = 128
     shuffle_dataset = True
@@ -101,6 +100,8 @@ if __name__ == "__main__":
     print("Final Validation accuracy:",
           calculate_accuracy(X_val, Y_val, model))
 
+
+    # Plot loss
     plt.ylim([0.2, .6])
     utils.plot_loss(train_history["loss"],
                     "Training Loss", npoints_to_average=10)
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Cross Entropy Loss - Average")
 
-    # plt.savefig("task3b_softmax_train_loss.png")
+    plt.savefig("task3b_softmax_train_loss.png")
     plt.savefig("task4_softmax_train_loss.png")
     if show_plots:
         plt.show()
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Accuracy")
     plt.legend()
-    # plt.savefig("task3b_softmax_train_accuracy.png")
+    plt.savefig("task3b_softmax_train_accuracy.png")
     plt.savefig("task4c_l2_reg_accuracy.png")
     if show_plots:
         plt.show()

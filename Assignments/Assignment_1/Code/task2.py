@@ -15,13 +15,13 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     Returns:
         Accuracy (float)
     """
+    # Creating vector of predictions (1 or 0)
     predictions = (model.forward(X) >= 0.5)
+    # Counting everytime prediction equals target. Then divding by batch size
     accuracy = np.count_nonzero(predictions == targets)/X.shape[0]
     return accuracy
 
-
 class LogisticTrainer(BaseTrainer):
-
     def train_step(self, X_batch: np.ndarray, Y_batch: np.ndarray):
         """
         Perform forward, backward and gradient descent step here.

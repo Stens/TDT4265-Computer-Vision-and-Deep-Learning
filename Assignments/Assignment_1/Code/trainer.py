@@ -99,10 +99,10 @@ class BaseTrainer:
                         else:
                             counter = 0
                             prev_best_loss = val_loss
+                            
                         # We have reached max number of passes trough dataset without improvement
                         if counter == self.stop_at_count:
-                            print(
-                                f"We went trough {epoch} of {num_epochs} before stopping")
+                            print(f"We went trough {epoch} of {num_epochs} before stopping")
                             return train_history, val_history
 
                 global_step += 1
