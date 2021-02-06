@@ -6,7 +6,6 @@ from trainer import BaseTrainer
 from task3a import cross_entropy_loss, SoftmaxModel, one_hot_encode
 np.random.seed(0)
 
-
 def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) -> float:
     """
     Args:
