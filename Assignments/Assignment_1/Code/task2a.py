@@ -39,7 +39,6 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
 
     return result
 
-
 class BinaryModel:
     def __init__(self):
         # Define number of input nodes
