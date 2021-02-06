@@ -16,7 +16,6 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
 
-    # elemtwise multiplication and sum over class axis
     cross_entropy = -np.sum(targets*np.log(outputs), axis=1)
     return np.mean(cross_entropy)
 
@@ -42,8 +41,9 @@ class SoftmaxModel:
             y: output of model with shape [batch size, num_outputs]
         """
         num = np.exp(X@self.w)
-        # axis 1 is k classes
-        den = np.sum(np.exp(X@self.w), axis=1)[:, None]  # add axis
+         
+        # Axis 1 represents K classes
+        den = np.sum(np.exp(X@self.w), axis=1)[:, None]   
         return num/den
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
@@ -55,13 +55,11 @@ class SoftmaxModel:
             outputs: outputs of model of shape: [batch size, num_outputs]
             targets: labels/targets of each image of shape: [batch size, num_classes]
         """
-
-        # To implement L2 regularization task (4b) you can get the lambda value in self.l2_reg_lambda
-        # which is defined in the constructor.
-
         batch_size = targets.shape[0]
         self.grad = (-(targets - outputs).T @ X).T / batch_size
 
+        # Implemented in 4b)
+        self.grad += self.l2_reg_lambda * 2*self.w
 
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
@@ -81,15 +79,12 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
-    one_hot_vector = [0]*num_classes
-    one_hot_matrix = np.array([one_hot_vector]*Y.shape[0])
-    for i in range(Y.shape[0]):
-        label = Y[i]
-        one_hot_matrix[i][label] = 1
+    # Initialize with zeros
+    one_hot = np.zeros((Y.shape[0], num_classes), dtype=int)
 
-    return one_hot_matrix
-    #raise NotImplementedError
-
+    # In index corresponding to label, insert 1
+    one_hot[np.array(range(len(Y))), Y.flatten()] = 1
+    return one_hot
 
 
 def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
@@ -116,6 +111,7 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
             # Actual gradient
             logits = model.forward(X)
             model.backward(X, logits, Y)
+            print(model.grad[i, j])
             difference = gradient_approximation - model.grad[i, j]
             assert abs(difference) <= epsilon**2,\
                 f"Calculated gradient is incorrect. " \

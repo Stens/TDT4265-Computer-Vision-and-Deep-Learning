@@ -5,6 +5,7 @@ from task2a import cross_entropy_loss, BinaryModel, pre_process_images
 from trainer import BaseTrainer
 np.random.seed(0)
 
+
 def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -> float:
     """
     Args:
@@ -14,17 +15,10 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     Returns:
         Accuracy (float)
     """
-
-    # TODO Implement this function (Task 2c)
-    correct_guesses = 0
-    output_vector = model.forward(X)
-    for i in range(X.shape[0]):
-        guess = X[i]
-        correct = targets[i]
-        if (guess >= 0.5 and correct == 1) or (guess < 0.5 and correct == 0):
-            correct_guesses += 1
-                                                                                                                                                          
-    accuracy = correct_guesses / X.shape[0]
+    # Creating vector of predictions (1 or 0)
+    predictions = (model.forward(X) >= 0.5)
+    # Counting everytime prediction equals target. Then divding by batch size
+    accuracy = np.count_nonzero(predictions == targets)/X.shape[0]
     return accuracy
 
 class LogisticTrainer(BaseTrainer):
@@ -39,13 +33,12 @@ class LogisticTrainer(BaseTrainer):
             Y: one batch of labels
         Returns:
             loss value (float) on batch
-        """       
-        
-        output_vector = self.model.forward(X_batch)
-        self.model.backward(X_batch,output_vector,Y_batch)
-        self.model.w -= self.learning_rate * self.model.grad
-
-        return cross_entropy_loss(Y_batch,output_vector)
+        """
+        out = self.model.forward(X_batch)
+        self.model.backward(X_batch, out, Y_batch)
+        self.model.w -= self.model.grad*self.learning_rate
+        loss = cross_entropy_loss(Y_batch, out)
+        return loss
 
     def validation_step(self):
         """
@@ -59,18 +52,18 @@ class LogisticTrainer(BaseTrainer):
         """
         # NO NEED TO CHANGE THIS FUNCTION
         logits = self.model.forward(self.X_val)
-        loss = cross_entropy_loss(Y_val, logits)
+        loss = cross_entropy_loss(self.Y_val, logits)
 
         accuracy_train = calculate_accuracy(
-            X_train, Y_train, self.model)
+            self.X_train, self.Y_train, self.model)
         accuracy_val = calculate_accuracy(
-            X_val, Y_val, self.model)
+            self.X_val, self.Y_val, self.model)
         return loss, accuracy_train, accuracy_val
 
 
 if __name__ == "__main__":
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 50
+    num_epochs = 500  # Changed from 50 to 500
     learning_rate = 0.05
     batch_size = 128
     shuffle_dataset = False
