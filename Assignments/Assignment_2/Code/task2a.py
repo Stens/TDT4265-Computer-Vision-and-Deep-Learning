@@ -4,6 +4,13 @@ import typing
 np.random.seed(1)
 
 
+def sigmoid(X):
+    try:
+        return 1 / (1 + np.exp(-X))
+    except:
+        return np.exp(X) / (1 + np.exp(X))
+
+
 def pre_process_images(X: np.ndarray):
     """
     Args:
@@ -11,10 +18,18 @@ def pre_process_images(X: np.ndarray):
     Returns:
         X: images of shape [batch size, 785] normalized as described in task2a
     """
+    # Litt usikker på om det er lurt å regne for alle set.
+    # Kanksje bare regne for training og bruke det på alle
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
-    # TODO implement this function (Task 2a)
-    return X
+    # Getting mean and std from training set
+    new_X = np.zeros((X.shape[0], X.shape[1]+1))
+    X_train, _, _, _ = utils.load_full_mnist()
+    mean = np.mean(X_train)
+    std = np.sqrt(np.cov(X_train.flatten()))
+    new_X[:, :-1] = (X-mean)/std
+    new_X[:, -1] = 1.0
+    return new_X
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
@@ -27,8 +42,8 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    cross_entropy = -np.sum(targets*np.log(outputs), axis=1)
+    return np.mean(cross_entropy)
 
 
 class SoftmaxModel:
@@ -42,7 +57,7 @@ class SoftmaxModel:
         # Always reset random seed before weight init to get comparable results.
         np.random.seed(1)
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
 
         # Define number of output nodes
@@ -71,7 +86,11 @@ class SoftmaxModel:
         # TODO implement this function (Task 2b)
         # HINT: For peforming the backward pass, you can save intermediate activations in varialbes in the forward pass.
         # such as self.hidden_layer_ouput = ...
-        return None
+        A = sigmoid(X@self.ws[0])
+        self.hidden_layer_ouput = A  # Store hidden layer output
+        Y = np.exp(A@self.ws[1]) / \
+            (np.sum(np.exp(A@self.ws[1]), axis=1)[:, None])
+        return Y
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
@@ -90,6 +109,16 @@ class SoftmaxModel:
         # For example, self.grads[0] will be the gradient for the first hidden layer
         self.grads = []
 
+        batch_size = X.shape[0]
+
+        y_k = -(targets-outputs)
+        sig_der = sigmoid(X@self.ws[0]) * (1 - sigmoid(X@self.ws[0]))
+
+        self.grads.append(
+            (((y_k@self.ws[1].T) * sig_der).T @ X).T/batch_size)  # shape 785,64
+        self.grads.append(
+            (y_k.T@self.hidden_layer_ouput).T/batch_size)  # shape 64,10
+
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
                 f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
@@ -106,14 +135,15 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
-    # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    one_hot = np.zeros((Y.shape[0], num_classes), dtype=int)
+    one_hot[np.array(range(len(Y))), Y.flatten()] = 1
+    return one_hot
 
 
 def gradient_approximation_test(
         model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
     """
-        Numerical approximation for gradients. Should not be edited. 
+        Numerical approximation for gradients. Should not be edited.
         Details about this test is given in the appendix in the assignment.
     """
     epsilon = 1e-3
