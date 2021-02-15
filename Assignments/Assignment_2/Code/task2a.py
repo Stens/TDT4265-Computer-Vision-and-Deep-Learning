@@ -13,9 +13,25 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
+
     # TODO implement this function (Task 2a)
-    training_mean = utils.load_full_mnist()[0]
-    return X
+
+    """
+        Kan muligens optimaliseres på flere måter
+            - Kall load_full_mnist() en gang
+            - Printe mean og std i konsoll og hardkode (Vit.ass endorsed this answ)
+    """
+    train_mean = np.mean(utils.load_full_mnist()[0])
+    train_std_var = np.std(utils.load_full_mnist()[0])
+
+    # Initialize with array with 784 + 1 dimms  
+    new_X = np.empty((X.shape[0], X.shape[1]+1))
+
+    # For each pixel in each image we normalize the pixel value between [-1,1], and add a 1 to include the bias trick
+    for i, batch in enumerate(X):
+        new_X[i, :-1] = (batch - train_mean) / train_std_var
+    new_X[:, -1] = 1.0
+    return new_X
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
