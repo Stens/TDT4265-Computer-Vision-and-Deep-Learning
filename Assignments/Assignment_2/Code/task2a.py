@@ -14,6 +14,7 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
+    training_mean = utils.load_full_mnist()[0]
     return X
 
 
@@ -27,8 +28,9 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    
+    cross_entropy = -np.sum(targets*np.log(outputs), axis=1)
+    return np.mean(cross_entropy)
 
 
 class SoftmaxModel:
@@ -106,9 +108,13 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
-    # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    
+    # Initialize empty vector
+    one_hot = np.empty((Y.shape[0], num_classes), dtype=int)
 
+    # In index corresponding to label, insert 1
+    one_hot[np.array(range(len(Y))), Y.flatten()] = 1
+    return one_hot
 
 def gradient_approximation_test(
         model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
