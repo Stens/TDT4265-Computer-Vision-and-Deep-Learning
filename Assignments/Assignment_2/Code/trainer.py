@@ -74,6 +74,7 @@ class BaseTrainer:
         )
 
         global_step = 0
+        prev_best_loss = np.inf
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)

@@ -15,8 +15,10 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
     Returns:
         Accuracy (float)
     """
-    # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
+    num_classes = targets.shape[1]
+    predictions = np.argmax(model.forward(X), axis=1)
+    accuracy = np.count_nonzero(
+        predictions == np.argmax(targets, axis=1))/X.shape[0]
     return accuracy
 
 
@@ -46,12 +48,16 @@ class SoftmaxTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
-        # TODO: Implement this function (task 2c)
-
-        loss = 0
-
-        loss = cross_entropy_loss(Y_batch, logits)  # sol
-
+        logits = self.model.forward(X_batch)
+        self.model.backward(X_batch, logits, Y_batch)
+        for i, w in enumerate(self.model.ws):
+            if self.use_momentum:
+                w -= self.previous_grads[i] * self.learning_rate  # t
+                self.previous_grads[i] = self.model.grads[i] + \
+                    self.momentum_gamma*self.previous_grads[i]  # t+1
+            else:
+                w -= self.model.grads[i]*self.learning_rate
+        loss = cross_entropy_loss(Y_batch, logits)
         return loss
 
     def validation_step(self):
@@ -79,7 +85,7 @@ class SoftmaxTrainer(BaseTrainer):
 
 if __name__ == "__main__":
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 50
+    num_epochs = 100
     learning_rate = .1
     batch_size = 32
     neurons_per_layer = [64, 10]
@@ -93,6 +99,7 @@ if __name__ == "__main__":
 
     # Load dataset
     X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
+
     X_train = pre_process_images(X_train)
     X_val = pre_process_images(X_val)
     Y_train = one_hot_encode(Y_train, 10)
