@@ -126,16 +126,17 @@ class SoftmaxModel:
         self.grads = []
         batch_size = X.shape[0]
 
-        delta_k = -(targets-outputs)
-        self.grads.insert(0, (delta_k.T @ self.hidden_layer_ouput[-1]).T /
-                          batch_size)
+        delta_k = -(targets-outputs)  # BP1
+        first_grad = self.hidden_layer_ouput[-1].T @ delta_k  # 1 / BP4
+        self.grads.insert(0, first_grad/batch_size)
 
         delta = delta_k
+        # Delta has shape batch_size, nodes_for layer L
         for i in range(1, self.layers):
             sig_der = self.sigmoid_der(self.zs[-i])
-            delta = (delta @ self.ws[-i].T) * sig_der
+            delta = (delta @ self.ws[-i].T) * sig_der  # BP2
             self.grads.insert(
-                0, (delta.T @ self.hidden_layer_ouput[-i-1]).T/batch_size)
+                0, (self.hidden_layer_ouput[-i-1].T @ delta)/batch_size)  # BP4
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\

@@ -26,11 +26,12 @@ if __name__ == "__main__":
                         description[0], npoints_to_average=10)
         plt.ylim([0, .6])
         plt.legend(loc="upper left")
+        plt.ylabel("Train Loss")
 
         plt.subplot(1, 2, 2)
-        utils.plot_loss(val_history["accuracy"], description[1])
+        utils.plot_loss(train_history["accuracy"], description[1])
         plt.ylim([0.85, 1.])
-        plt.ylabel("Validation Accuracy")
+        plt.ylabel("Train Accuracy")
         plt.legend(loc="upper right")
 
     # Setting parameters
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     )
     train_history, val_history = trainer.train(num_epochs)
     plot_metrics(train_history, val_history, [
-                 "Loss improved weights", "Accuracy improved weights"])
+                 "Loss (improved weights)", "Accuracy (improved weights)"])
     # Setting parameters,
     use_improved_weight_init = True
     use_improved_sigmoid = True
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     train_history, val_history = trainer.train(
         num_epochs)
     plot_metrics(train_history, val_history, [
-                 "Loss improved sigmoid", "Accuracy improved sigmoid"])
+                 "Loss (improved sigmoid)", "Accuracy (improved sigmoid)"])
 
     # Setting parameters, all true
     use_improved_weight_init = True
@@ -87,6 +88,7 @@ if __name__ == "__main__":
         num_epochs)
 
     plot_metrics(train_history, val_history, [
-                 "Loss with momentum", "Accuracy with momentum"])
+                 "Loss (momentum)", "Accuracy (momentum)"])
+    plt.savefig("task3.png")
 
     plt.show()
