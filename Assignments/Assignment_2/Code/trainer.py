@@ -23,6 +23,7 @@ class BaseTrainer:
         self.batch_size = batch_size
         self.model = model
         self.shuffle_dataset = shuffle_dataset
+        self.stop_at_count = 50
 
     def validation_step(self):
         """
@@ -73,6 +74,7 @@ class BaseTrainer:
         )
 
         global_step = 0
+        prev_best_loss = np.inf
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
@@ -87,6 +89,18 @@ class BaseTrainer:
                     train_history["accuracy"][global_step] = accuracy_train
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
-                    # TODO: Implement early stopping (copy from last assignment)
+
+                    if self.stop_at_count:
+                        # No improvement
+                        if prev_best_loss < val_loss:
+                            counter += 1
+                        else:
+                            counter = 0
+                            prev_best_loss = val_loss
+                        # We have reached max number of passes trough dataset without improvement
+                        if counter == self.stop_at_count:
+                            print(
+                                f"We went trough {epoch} of {num_epochs} before stopping")
+                            return train_history, val_history
                 global_step += 1
         return train_history, val_history
