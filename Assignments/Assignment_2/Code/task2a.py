@@ -11,17 +11,16 @@ def pre_process_images(X: np.ndarray):
     Returns:
         X: images of shape [batch size, 785] normalized as described in task2a
     """
-    # Litt usikker på om det er lurt å regne for alle set.
-    # Kanksje bare regne for training og bruke det på alle
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
-    # Getting mean and std from training set
+    # Computing mean and std from training set
     new_X = np.zeros((X.shape[0], X.shape[1]+1))
     X_train, _, _, _ = utils.load_full_mnist()
     mean = np.mean(X_train)
     std = np.sqrt(np.cov(X_train.flatten()))
+    # Normalizing
     new_X[:, :-1] = (X-mean)/std
-    new_X[:, -1] = 1.0
+    new_X[:, -1] = 1.0  # Bias Trick
     return new_X
 
 
@@ -127,11 +126,11 @@ class SoftmaxModel:
         batch_size = X.shape[0]
 
         delta_k = -(targets-outputs)  # BP1
-        first_grad = self.hidden_layer_ouput[-1].T @ delta_k  # 1 / BP4
+        first_grad = self.hidden_layer_ouput[-1].T @ delta_k  # BP4
         self.grads.insert(0, first_grad/batch_size)
 
         delta = delta_k
-        # Delta has shape batch_size, nodes_for layer L
+        # Delta has shape batch_size, nodes_for_ layer_l
         for i in range(1, self.layers):
             sig_der = self.sigmoid_der(self.zs[-i])
             delta = (delta @ self.ws[-i].T) * sig_der  # BP2
