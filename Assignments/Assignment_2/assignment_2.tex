@@ -64,6 +64,9 @@
 \subsection{Task 1a: Backpropagation}
 
 \subsubsection*{i)}
+\textit{Notation:} To easier distinguish between $z$ values when deriving certain calculations, $z^o$ will mean KANSKJE?????
+
+
 
 In the neural network considered in this assignment the gradient descent update rule for weights $w_{ji}$ of the \textbf{hidden} layer is given by
 
@@ -73,15 +76,16 @@ In the neural network considered in this assignment the gradient descent update 
 \end{equation}
 where $C(w)$ is the cross entropy loss, defined by
 \begin{equation}
-    C(w)=\frac{1}{N} \sum_{n=1}^{N} C^{n}(w), \quad C^{n}(w)=-\sum_{j=1}^{J} y_{k}^{n} \ln \left(\hat{y}_{k}^{n}\right)
+    C(w)=\frac{1}{N} \sum_{n=1}^{N} C^{n}(w), \quad C^{n}(w)=-\sum_{k=1}^{K} y_{k}^{n} \ln \left(\hat{y}_{k}^{n}\right)
     \label{eq:cross_entropy}
 \end{equation}
 where $\hat{y}$ is the Softmax activation function for the \textit{output} layer, defined by
 
 \begin{equation}
-    \hat{y}_{k}=\frac{e^{z_{k}}}{\sum_{k^{\prime}}^{K} e^{z_{k^{\prime}}}}, \quad \text { where } z_{k}=w_{k}^{T} \cdot a=\sum_{j}^{I} w_{k, j} \cdot a_{j}
+    \hat{y}_{k}=\frac{e^{z_{k}}}{\sum_{k^{\prime}}^{K} e^{z_{k^{\prime}}}}, \quad \text { where } z_{k}=w_{k}^{T} \cdot a=\sum_{j}^{J} w_{kj} \cdot a_{j}
     \label{eq:softmax}
 \end{equation}
+
 where $w_{kj}$ are weights in the output layer and $a_j = f(z_j)$ is the is the Sigmoid activation function for a node (neuron?) in the \textit{hidden} layer, defined as
 
 \begin{equation}
@@ -100,18 +104,20 @@ By algebraic manipulation it can be shown that \eqref{eq:1a_start} can be writte
 
 by defining $\delta_{j}=\frac{\partial C}{\partial z_{j}}$.
 
-To derive the equvialent expression for the gradient descent update rule given by \eqref{eq:1a_goal} consider the partial derivative of the cross entropy loss function w.r.t the variable $w_{ji}$. From \eqref{eq:cross_entropy} and \eqref{eq:softmax} it is clear that $C(w)$ has a dependence on $z_k$. Furthermore, from \eqref{eq:softmax}, it is clear that $z_k$ in turn has a dependence on $a_j$, which in turn has a dependence on $z_j$, as evident from \eqref{eq:sigmoid}. Finally, from \eqref{eq:sigmoid} it is clear that $z_j$ has a dependence on $w_{ji}$. Consequently, the cost functions dependence on the variable $w_{ji}$ is ``chained together'' through the variables $z_k$,$a_j$ and $z_j$. By defining vectors $\boldsymbol{z_{K}} = [z_1,z_2,\dots,z_K]$, $\boldsymbol{a} = [a_1,a_2,\dots,a_J]$ and $\boldsymbol{z_J} = [z_1,z_2,\dots,z_J]$ we can express the cross entropy loss function in terms of its variables in the following way
+To derive the equvialent expression for the gradient descent update rule given by \eqref{eq:1a_goal} consider the partial derivative of the cross entropy loss function w.r.t the variable $w_{ji}$. From \eqref{eq:cross_entropy} and \eqref{eq:softmax} it is clear that $C(w)$ has a dependence on $z_k$. Furthermore, from \eqref{eq:softmax}, it is clear that $z_k$ in turn has a dependence on $a_j$, which in turn has a dependence on $z_j$, as evident from \eqref{eq:sigmoid}. Finally, from \eqref{eq:sigmoid} it is clear that $z_j$ has a dependence on $w_{ji}$. Consequently, the cost functions dependence on the variable $w_{ji}$ is ``chained together'' through the variables $z_k$,$a_j$ and $z_j$. By defining $\boldsymbol{z_{o}} = [z_1,z_2,\dots,z_K]$ as the vector containing $z$ values from the output layer, $\boldsymbol{a} = [a_1,a_2,\dots,a_J]$ as the vector with $a$ values from the hidden layer and $\boldsymbol{z_h} = [z_1,z_2,\dots,z_J]$ as the vector containing $z$ values from the hidden layer, we can express the cross entropy loss function in terms of its variables in the following way
 \begin{align}
 \begin{split}
-    C(w) &= C(\boldsymbol{z_K}) \\ 
-    &= C\big(\boldsymbol{z_K}(\boldsymbol{a})\big) \\
-    &= C\bigg(\boldsymbol{z_K}\big(\boldsymbol{a}(\boldsymbol{z_J})\big)\bigg) \\
-    &= C\bigg(\boldsymbol{z_K}\big(\boldsymbol{a}(\boldsymbol{z_J}(w))\big)\bigg)
+    C(w) &= C(\boldsymbol{z_o}) \\ 
+    &= C\big(\boldsymbol{z_o}(\boldsymbol{a})\big) \\
+    &= C\bigg(\boldsymbol{z_o}\big(\boldsymbol{a}(\boldsymbol{z_h})\big)\bigg) \\
+    &= C\bigg(\boldsymbol{z_o}\big(\boldsymbol{a}(\boldsymbol{z_h}(w))\big)\bigg)
     \label{eq:cost_var_def}
 \end{split}
 \end{align}
 
-with $K$ representing the number of nodes in the output layer, and $J$ representing the number of nodes in the hidden layer. In this case, the lowercase $w$ represents the weight matrix from the input layer to the hidden layer, in accordance with the notation in the assignment description (later in the report matrices will be represented by bold, uppercase letters). Therefore, the derivative of the cross entropy loss function, w.r.t to any weight in the \textit{hidden} layer $w_{ji}$, $\frac{\partial C}{\partial w_{ji}}$, can be expressed by applying the multivariate chain rule. In the following, to differentiate between $z$ values, the $z$ from the hidden layer will be labeled $z^j$ and the $z$ from the output layer will be labeled $z^k$. 
+with $K$ representing the number of nodes in the output layer, and $J$ representing the number of nodes in the hidden layer. In this case, the lowercase $w$ represents the weight matrix from the input layer to the hidden layer, in accordance with the notation in the assignment description (later in the report matrices will be represented by bold, uppercase letters). Therefore, the derivative of the cross entropy loss function, w.r.t to any weight in the \textit{hidden} layer $w_{ji}$, $\frac{\partial C}{\partial w_{ji}}$, can be expressed by applying the multivariate chain rule.
+
+In the following, to distinguish between $z$ vector from the different layers in the network, entries from the $z$ vector from the hidden layer will be labeled $z^j$ and entries from the $z$ vector from the output layer will be labeled $z^k$. This is needed to distinguish between i.e $z_{1}$ from the hidden layer and $z_1$ from the output layer.
 
 \begin{align}
 \begin{split}
@@ -124,41 +130,43 @@ with $K$ representing the number of nodes in the output layer, and $J$ represent
 \end{split} \label{eq:chain}
 \end{align}
 
-Equation \eqref{eq:chain} can be simplified to a set of sums
+Equation \eqref{eq:chain} can be simplified to a set of sums (\textit{Notation}: Note that as there no longer exist a need to distinguish between $z$ vectors from the different layers in the network, as this will now be clear from the variable ($j$ or $k$) used to index the vectors in accordance with the notation in the assignment description).   
 
 \begin{equation}
     \frac{\partial C}{\partial w_{ji}} = \sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j'=1}^J \frac{\partial z_k}{\partial a_{j'}}\frac{\partial a_{j'}}{\partial z_{j'}}\frac{\partial z_{j'}}{\partial w_{ji}} \Bigg)
     \label{eq:chain_sum}
 \end{equation}
 
-To further simplify \eqref{eq:chain_sum}, consider the last partial derviative, $\frac{\partial z_j}{\pratial w_{ji}}$. From the definition of $z_j$ given in \eqref{eq:sigmoid} the derivative w.r.t to $w_{ji}$ can be expressed as
+To further simplify \eqref{eq:chain_sum}, consider the last partial derviative, $\frac{\partial z_{j'}}{\pratial w_{ji}}$. From the definition of $z_j$ given in \eqref{eq:sigmoid} the derivative w.r.t to $w_{ji}$ can be expressed as
 
 \begin{equation}
-    \frac{\partial z_j}{\partial w_{ji}} = \frac{\partial}{\partial w_{ji}} \sum_{i'=1}^I w_{ji'}x_{i'}, \quad \text{for a given \textit{j}}
+    \frac{\partial z_{j'}}{\partial w_{ji}} = \frac{\partial}{\partial w_{ji}} \sum_{i'=1}^I w_{j'i'}x_{i'}, \quad \text{for a given \textit{j'}}
     \label{eq:diffzj}
 \end{equation}
 
-Similar to when deriving the gradients of the cost function in Assignment 1, the resulting differentiation of the sums in \eqref{eq:diffzj} w.r.t to a given given weight, $w_{j'i'}$ will only be non-zero for $j' = j$ and $i' = i$. When this is the case the differentiation expression becomes
+Similar to when deriving the gradients of the cost function in Assignment 1, the resulting differentiation of the sums in \eqref{eq:diffzj} w.r.t to a given given weight, $w_{j'i'}$ will only be non-zero for $j' = j$ and $i' = i$. When this is the case the differentiation of $z_{j'} = z_j$ becomes
 
 \begin{align}
 \begin{split}
-    \frac{\partial z_j}{\partial w_{ji}} &= \frac{\partial }{\partial w_{ji}} \sum_{i'=1}^I w_{ji'}x_{i'} \\
+    \frac{\partial z_{j}}{\partial w_{ji}} &= \frac{\partial }{\partial w_{ji}} \sum_{i'=1}^I w_{ji'}x_{i'} \\
     &= \frac{\partial}{\partial w_{ji}} w_{ji}x_i \\
     &= x_i
 \end{split}
 \label{eq:diffzjdone}
 \end{align}
  
- Thus it is clear from \eqref{eq:diffzjdone} that $\frac{\partial z_j}{\partial w_{ji}} = x_i$, and thus it is independent of the $j$ and $k$ indecies. Consequently it can be moved outside of the sums that goes over all $j$ and over all $k$.
+ Thus it is clear that $\frac{\partial z_{j'}}{\partial w_{ji}} = x_i$, for $j' = j$ and thus it is independent of the $j'$ and $k$ indecies. Consequently it can be moved outside of the sums that goes over all $j'$ and over all $k$.
  
 \begin{align}
 \begin{split}
-    \frac{\partial C}{\partial w_{ji}} &= \sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j=1}^J \frac{\partial z_k}{\partial a_j}\frac{\partial a_j}{\partial z_j}\frac{\partial z_j}{\partial w_{ji}} \Bigg) \\
-    &=  \sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j=1}^J \frac{\partial z_k}{\partial a_j}\frac{\partial a_j}{\partial z_j}x_i \Bigg) \\
-    &=  \Bigg(\sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j=1}^J \frac{\partial z_k}{\partial a_j}\frac{\partial a_j}{\partial z_j}\Bigg)\Bigg) x_i
+    \frac{\partial C}{\partial w_{ji}} &= \sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j'=1}^J \frac{\partial z_k}{\partial a_{j'}}\frac{\partial a_{j'}}{\partial z_{j'}}\frac{\partial z_{j'}}{\partial w_{ji}} \Bigg) \\
+    &=  \sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j'=1}^J \frac{\partial z_k}{\partial a_{j'}}\frac{\partial a_{j'}}{\partial z_{j'}}x_i \Bigg) \\
+    &=  \Bigg(\sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j'=1}^J \frac{\partial z_k}{\partial a_{j'}}\frac{\partial a_{j'}}{\partial z_{j'}}\Bigg)\Bigg) x_i
     \label{eq:movexiout}
 \end{split}
 \end{align}
+
+KAN STRENGT TATT LA VÆRE Å BRUKE J' INDEKS HERIFRA OG UT, MEN VURDER Å LEGGE TIL LIKVEL / FORKARE HVORFOR.
 
 Furthermore, consider the definition of $\delta_j$, given by
 
@@ -171,30 +179,19 @@ Furthermore, consider the definition of $\delta_j$, given by
  
 \begin{equation}
     \delta_j = \frac{\partial C}{\partial z_j} = \sum_{k=1}^K \frac{\partial C}{\partial z_k} \bigg(\sum_{j=1}^J\frac{\partial z_k}{\partial a_j}\frac{\partial a_j}{\partial z_j} \bigg)
+    \label{eq:djchain}
 \end{equation}
- 
-gammel
-
-By using the definition of $\delta_j$, the definition of $z_j$ given in \eqref{eq:softmax} and the fact that differentiation if a linear operator, \eqref{eq:chain} can be rewritten as
+By inserting the result in \eqref{eq:djchain} into \eqref{eq:movexiout}, the derivative of the cost function w.r.t $w_{ji}$ becomes
 
 \begin{align}
 \begin{split}
-         \frac{\partial C}{\partial w_{ji}} &= \sum_{j=1}^J \delta_j \frac{\partial z_j}{\partial w_{ji}} \\
-         &= \sum_{j=1}^J \delta_j \frac{\partial}{\partial w_{ji}} \bigg( \sum_{i = 1}^I w_{ji}x_i \bigg) \\
-         &= \frac{\partial}{\partial w_{ji}} \sum_{j=1}^J \sum_{i = 1}^I \delta_j w_{ji}x_i
-\end{split}
-\label{eq:diff_sums}
-\end{align}
-
-Similiar to when deriving the gradients of the cost function in Assignment 1, the resulting differentiation of the sums in \eqref{eq:diff_sums} w.r.t to a given given weight, $w_{j'i'}$ will only be non-zero for $j' = j$ and $i' = i$. When this is the case the differentiation expression becomes 
-\begin{align}
-\begin{split}
-    \frac{\partial C}{\partial w_{ji}} &= \frac{\partial}{\partial w_{ji}} \sum_{j=1}^J \sum_{i = 1}^I \delta_j w_{ji}x_i \\
-    &= \frac{\partial}{\partial w_{ji}} \delta_j \w_{ji}x_i \\
-    &= \delta_jx_i
+     \frac{\partial C}{\partial w_{ji}} &= \Bigg(\sum_{k=1}^K \frac{\partial C}{\partial z_k}\Bigg( \sum_{j=1}^J \frac{\partial z_k}{\partial a_j}\frac{\partial a_j}{\partial z_j}\Bigg)\Bigg) x_i \\
+     &= \frac{\partial C}{\partial z_j} x_i \\
+     &= \delta_j x_i
 \end{split}
 \label{eq:dif_done}
 \end{align}
+
 Finally, inserting the result in \eqref{eq:dif_done} into \eqref{eq:1a_start}, the desired result given by \eqref{eq:1a_goal} is found. \qed
 
 \subsubsection*{ii)}
@@ -209,10 +206,67 @@ where $z_j$ is defined as in \eqref{eq:softmax}, it can be shown that $\delta_j$
 
 \begin{equation}
     \delta_j = f'(z_j)  \sum_{k=1}^K w_{kj} \delta_k
+    \label{eq:part2goal}
 \end{equation}
-where $\delta_k = \frac{\partial C}{\partial z_k} = -(y_k - \hat{y}_k)$ and $f'(z_j)$ is the slope of the sigmoid activation function for the hidden layer, given by \eqref{eq:softmax}.
+where $\delta_k = \frac{\partial C}{\partial z_k} = -(y_k - \hat{y}_k)$ and $f'(z_j) = \frac{\partial f}{\partial z_j} = \frac{\partial a_j}{\partial z_j}$ is the slope of the Sigmoid activation function for the hidden layer, given by \eqref{eq:softmax}.
 
-To prove the 
+To prove the relationship given by \eqref{eq:part2goal}, recall from part \textit{i)} and \eqref{eq:djchain} the definition of $\delta_j$ with the derivative written out according to the chain rule
+
+\begin{equation}
+        \delta_j = \frac{\partial C}{\partial z_j} = \sum_{k=1}^K \frac{\partial C}{\partial z_k} \bigg(\sum_{j'=1}^J\frac{\partial z_k}{\partial a_{j'}}\frac{\partial a_{j'}}{\partial z_j} \bigg)
+    \label{eq:djchainagain}
+\end{equation}
+
+First, consider the term $\frac{\partial z_k}{a_{j'}}$ which, from the definition of $z_k$, can be expressed as
+\begin{align}
+\begin{split}
+    \frac{\partial z_k}{\partial a_{j'}} &= \frac{\partial}{\partial a_{j'}} \sum_{j'' = 1}^J w_{kj''} \cdot a_{j''}, \quad \text{for a given \textit{k}}
+\end{split}
+\label{eq:zk_diff_aj}
+\end{align}
+
+Again, the expression in \eqref{eq:zk_diff_aj} is only non-zero for $j'' = j'$, in which the resulting expression becomes
+
+\begin{align}
+\begin{split}
+    \frac{\partial z_k}{\partial a_{j'}} &= \frac{\partial}{\partial a_{j'}} \sum_{j'' = 1}^J w_{kj''} \cdot a_{j''} \\
+    &=  \frac{\partial}{\partial a_{j'}} w_{kj'} \cdot a_{j'} \\
+    &= w_{kj'}
+\end{split}
+\label{eq:diff_zk_done}
+\end{align}
+
+Inserting the result in \eqref{eq:diff_zk_done} into \eqref{eq:djchainagain} gives
+\begin{align}
+\begin{split}
+        \delta_j &= \frac{\partial C}{\partial z_j} = \sum_{k=1}^K \frac{\partial C}{\partial z_k} \bigg(\sum_{j'=1}^J\frac{\partial z_k}{\partial a_{j'}}\frac{\partial a_{j'}}{\partial z_j} \bigg) \\
+        &= \sum_{k=1}^K \frac{\partial C}{\partial z_k} \bigg(\sum_{j'=1}^J w_{kj'} \frac{\partial a_{j'}}{\partial z_j} \bigg)
+\end{split}
+\label{eq:dj_shorter}
+\end{align}
+
+Next, consider the expression $\sum_{j'=1}^J w_{kj'} \frac{\partial a_{j'}}{\partial z_j}$. Differentiating $a_{j'}$ w.r.t the variable $z_j$ will only be non-zero when $j' = j$. When this is the case, the resulting derivative becomes
+\begin{align}
+\begin{split}
+    \sum_{j'=1}^J w_{kj'} \frac{\partial a_{j'}}{\partial z_j} &= w_{kj}\frac{\partial a_j}{\partial z_j} \\ &= w_{kj} f'(z_j)
+\end{split}
+\label{eq:diff_aj_zj}
+\end{align}
+since $a_j = f(z_j)$. Inserting the result in \eqref{eq:diff_aj_zj} into \eqref{eq:dj_shorter} gives
+
+\begin{align}
+\begin{split}
+     \delta_j &= \sum_{k=1}^K \frac{\partial C}{\partial z_k} \bigg(\sum_{j'=1}^J w_{kj'} \frac{\partial a_{j'}}{\partial z_j} \bigg) \\
+     &=\sum_{k=1}^K \frac{\partial C}{\partial z_k} \bigg( w_{kj} f'(z_j)\bigg)
+\end{split}
+\label{eq:almost_there}
+\end{align}
+Observe that $f'(z_j)$ is independent of $k$ and consequently can be moved outside the sum over all $k$. Finally, by the definition $\delta_k = \frac{\partial C}{\partial z_k}$ the desired expression for $\delta_j$ is achieved
+
+\begin{equation}
+    \delta_j = f'(z_j) \sum_{k=1}^K \delta_k w_{kj}
+\end{equation}
+\qed
 \subsection{Task 1b: Vectorize computation}
 \textit{Notation:} To represent matrices, a bold uppercase letter, i.e \textbf{W}, will be used. To represent vectors, a bold and italic lowercase letter, i.e $\boldsymbol{w}$, will be used. To represent a scalar, an italic lowercase letter, i.e $w$, will be used. 
 
@@ -351,17 +405,24 @@ where $f(z_j)$ is the sigmoid activation in the hidden layer, as defined in \eqr
 HUSK Å DOBBELTSJEKKE HVILKEN VEKTOR SOM SKAL TRANSPOSES!!!!
 BYTTE REKKEFØLGE, GIR MER MENING
 \section{}
-\subsection{Task 2a: Mean and standard deviation of dataset }
-\begin{table}[h]
+\subsection{Task 2a: Mean and standard deviation of training set}
+
+Before the pixel values of the image are fed into the network they are normalized in the following way
+
+\begin{equation}
+    X_{norm} = \frac{X - \mu}{\sigma}
+\end{equation}
+where $\mu$ and $\sigma$ are the mean and standard deviation of the \textit{training set}. The values for mean and standard deviation of the training dataset is shown in \autoref{tab:mean_var}. 
+\begin{table}[H]
 \centering
-\label{tab:my-table}
+\caption{Characteristics of the training dataset}
+\label{tab:mean_var}
 \begin{tabular}{|l|l|}
 \hline
 \textbf{Distribution parameter} & \textbf{Value} \\ \hline
 Mean                            & 33.55          \\ \hline
 Standard deviation              & 78.88          \\ \hline
 \end{tabular}
-\caption{Characteristics of the data set}
 \end{table}
 \subsection{Task 2c}
 
@@ -373,8 +434,8 @@ Standard deviation              & 78.88          \\ \hline
 \end{figure}
 
 
-\subsection{Task 2d}
-The number of parameters in the network is defined as the number of weights plus the number of biases. In our case the network has two layers with 64 nodes in the hidden layer and 10 nodes in the output layer.The input vector $\mathbf{x}$ consists of 785 elements, 784 data points and 1 bias. This results in two weight matrices, $\mathbf{W}$, that have dimensions $785\times64$ and $64\times10$. The weights include biases, because we have used the bias trick. The resulting number of parameters $P$ is thus:
+\subsection{Task 2d: Number of parameters}
+The number of parameters in the network is defined as the number of weights plus the number of biases. In our case the network has two layers with 64 nodes in the hidden layer and 10 nodes in the output layer. The input vector $\boldsymbol{x}$ consists of 785 elements, 784 data points and 1 bias. This results in two weight matrices, $\mathbf{W_1}$ and $\mathbf{W_2}$, that both have dimensions $[785\times64]$ and $[64\times10]$. The weights include biases, because we have used the bias trick. The resulting number of parameters $P$ is thus:
 \begin{equation}
     P = 785\cdot64 + 64\cdot 10 = 50,880 
 \end{equation}
