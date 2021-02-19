@@ -29,7 +29,8 @@ if __name__ == "__main__":
             utils.plot_loss(val_history["loss"], ("Validation " + description[0]))
         plt.ylim([0, .6])
         plt.legend(loc="upper left")
-        plt.ylabel("Train Loss")
+        plt.xlabel("Training steps")
+        plt.ylabel("Average Cross entropy Loss")
     def plot_metrics_acc(train_history, val_history, description=["", ""],*,use_val=False):
         #plt.subplot(1, 2, 2)
         plt.title("Training and Validation accuracy")
@@ -37,9 +38,11 @@ if __name__ == "__main__":
         if use_val:
             utils.plot_loss(val_history["accuracy"],("Validation " + description[1]))
         plt.ylim([0.85, 1.])
-        plt.ylabel("Train Accuracy")
-        plt.legend(loc="upper right")
+        plt.ylabel("Accuracy")
+        plt.xlabel("Training steps")
+        plt.legend(loc="lower right")
 
+    
     # First nothing
     use_improved_weight_init = False
     use_improved_sigmoid = False
@@ -56,7 +59,8 @@ if __name__ == "__main__":
     )
 
     train_history_nothing, val_history_nothing = trainer.train(num_epochs)
-
+    
+    
     # Adding improved weights
     use_improved_weight_init = True
     use_improved_sigmoid = False
@@ -73,23 +77,70 @@ if __name__ == "__main__":
     )
 
     train_history_im_weights, val_history_im_weights = trainer.train(num_epochs)
+    
+    
+    # Adding improved sigmoid
+    use_improved_weight_init = True
+    use_improved_sigmoid = True
+    use_momentum = False
 
+    model = SoftmaxModel(
+        neurons_per_layer,
+        use_improved_sigmoid,
+        use_improved_weight_init)
+    trainer = SoftmaxTrainer(
+        momentum_gamma, use_momentum,
+        model, learning_rate, batch_size, shuffle_data,
+        X_train, Y_train, X_val, Y_val,
+    )
 
+    train_history_im_sigmoid, val_history_im_sigmoid = trainer.train(num_epochs)
+    
+    
+    
+    # Adding momentum
+    use_improved_weight_init = True
+    use_improved_sigmoid = True
+    use_momentum = True
+
+    model = SoftmaxModel(
+        neurons_per_layer,
+        use_improved_sigmoid,
+        use_improved_weight_init)
+    trainer = SoftmaxTrainer(
+        momentum_gamma, use_momentum,
+        model, learning_rate, batch_size, shuffle_data,
+        X_train, Y_train, X_val, Y_val,
+    )
+
+    train_history_momentum, val_history_momentum = trainer.train(num_epochs)
+    
+
+    # All plotting is done after the training with different tricks is done
+    # Remove the ones not wanted in plot (if you want to avoid messy plot)
+    
     plot_metrics_loss(train_history_nothing, val_history_nothing, [
                  "Loss (no additions)", "Accuracy (no additions)"],use_val=True)
     plot_metrics_loss(train_history_im_weights, val_history_im_weights, [
                  "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)
-    plt.savefig("task3a_loss.png")
+    plot_metrics_loss(train_history_im_sigmoid, val_history_im_sigmoid, [
+                "Loss (improved sigmoid + weights)", "Accuracy (improved sigmoid + weights)"],use_val=True)
+    plot_metrics_loss(train_history_momentum, val_history_momentum, [
+                 "Loss (weights, sigmoid and momentum)", "Accuracy (weights, sigmoid and momentum)"],use_val=True)
+    #plt.savefig("task3a_loss.png")
 
     plt.show()
-
 
     plot_metrics_acc(train_history_nothing, val_history_nothing, [
                  "Loss (no additions)", "Accuracy (no additions)"],use_val=True) 
     plot_metrics_acc(train_history_im_weights, val_history_im_weights, [
-                 "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)   
+                 "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)
+    plot_metrics_acc(train_history_im_sigmoid, val_history_im_sigmoid, [
+                     "Loss (improved sigmoid + weights)", "Accuracy (improved sigmoid + weights)"],use_val=True)
+    plot_metrics_acc(train_history_momentum, val_history_momentum, [
+                "Loss (weights, sigmoid and momentum)", "Accuracy (weights, sigmoid and momentum)"],use_val=True) 
     
-    plt.savefig("task3a_acc.png")
+    #plt.savefig("task3a_acc.png")
     plt.show()
 
 
