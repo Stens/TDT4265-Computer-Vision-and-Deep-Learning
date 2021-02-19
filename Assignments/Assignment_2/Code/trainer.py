@@ -100,7 +100,7 @@ class BaseTrainer:
                         # We have reached max number of passes trough dataset without improvement
                         if counter == self.stop_at_count:
                             print(
-                                f"We went trough {epoch} of {num_epochs} before stopping")
+                                f"We went trough {epoch} of {num_epochs} epochs before stopping")
                             return train_history, val_history
                 global_step += 1
         return train_history, val_history

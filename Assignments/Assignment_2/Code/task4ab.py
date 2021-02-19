@@ -1,7 +1,10 @@
 import utils
 import matplotlib.pyplot as plt
-from task2a import pre_process_images, one_hot_encode, SoftmaxModel
-from task2 import SoftmaxTrainer
+import numpy as np
+from task2a import pre_process_images, one_hot_encode, SoftmaxModel, cross_entropy_loss
+from task2 import SoftmaxTrainer, calculate_accuracy
+np.random.seed(0)
+
 
 if __name__ == "__main__":
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
@@ -35,6 +38,15 @@ if __name__ == "__main__":
         X_train, Y_train, X_val, Y_val,
     )
     train_history_64, val_history_64 = trainer.train(num_epochs)
+    print("\n\n --------------------------")
+    print(neurons_per_layer)
+    print("Final Train Cross Entropy Loss:",
+          cross_entropy_loss(Y_train, model.forward(X_train)))
+    print("Final Validation Cross Entropy Loss:",
+          cross_entropy_loss(Y_val, model.forward(X_val)))
+    print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
+    print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
+    print("\n\n --------------------------")
 
     neurons_per_layer = [32, 10]
 
@@ -48,6 +60,15 @@ if __name__ == "__main__":
         X_train, Y_train, X_val, Y_val,
     )
     train_history_32, val_history_32 = trainer.train(num_epochs)
+    print("\n\n --------------------------")
+    print(neurons_per_layer)
+    print("Final Train Cross Entropy Loss:",
+          cross_entropy_loss(Y_train, model.forward(X_train)))
+    print("Final Validation Cross Entropy Loss:",
+          cross_entropy_loss(Y_val, model.forward(X_val)))
+    print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
+    print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
+    print("\n\n --------------------------")
 
     neurons_per_layer = [128, 10]
 
@@ -62,39 +83,51 @@ if __name__ == "__main__":
     )
     train_history_128, val_history_128 = trainer.train(num_epochs)
 
+    print("\n\n --------------------------")
+    print(neurons_per_layer)
+    print("Final Train Cross Entropy Loss:",
+          cross_entropy_loss(Y_train, model.forward(X_train)))
+    print("Final Validation Cross Entropy Loss:",
+          cross_entropy_loss(Y_val, model.forward(X_val)))
+    print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
+    print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
+    print("\n\n --------------------------")
+
     # Plot loss for first model
     plt.figure(figsize=(20, 12))
-    plt.subplot(1, 2, 1)
     plt.ylim([0., .5])
     # 64 units
     utils.plot_loss(train_history_64["loss"],
                     "Training Loss (64)", npoints_to_average=10)
-    # utils.plot_loss(val_history_64["loss"], "Validation Loss (64)")
+    utils.plot_loss(val_history_64["loss"], "Validation Loss (64)")
     # 32 units
     utils.plot_loss(train_history_32["loss"],
                     "Training Loss (32)", npoints_to_average=10)
-    # utils.plot_loss(val_history_32["loss"], "Validation Loss (32)")
+    utils.plot_loss(val_history_32["loss"], "Validation Loss (32)")
     # 128 units
     utils.plot_loss(train_history_128["loss"],
                     "Training Loss (128)", npoints_to_average=10)
-    # utils.plot_loss(val_history_128["loss"], "Validation Loss (128)")
+    utils.plot_loss(val_history_128["loss"], "Validation Loss (128)")
     plt.legend()
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Cross Entropy Loss - Average")
     # Plot accuracy
-    plt.subplot(1, 2, 2)
+    plt.show()
+
+    plt.figure(figsize=(20, 12))
+
     plt.ylim([0.90, 1.01])
     # 64 units
     utils.plot_loss(train_history_64["accuracy"], "Training Accuracy (64)")
-    # utils.plot_loss(val_history_64["accuracy"], "Validation Accuracy (64)")
+    utils.plot_loss(val_history_64["accuracy"], "Validation Accuracy (64)")
     # 32 units
     utils.plot_loss(train_history_32["accuracy"], "Training Accuracy (32)")
-    # utils.plot_loss(val_history_32["accuracy"], "Validation Accuracy (32)")
+    utils.plot_loss(val_history_32["accuracy"], "Validation Accuracy (32)")
     # 128 units
     utils.plot_loss(train_history_128["accuracy"], "Training Accuracy (128)")
-    # utils.plot_loss(val_history_128["accuracy"], "Validation Accuracy (128)")
+    utils.plot_loss(val_history_128["accuracy"], "Validation Accuracy (128)")
 
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Accuracy")
     plt.legend()
-    plt.savefig("task4ab_train_loss.png")
+    plt.show()

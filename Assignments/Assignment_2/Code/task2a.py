@@ -56,7 +56,7 @@ class SoftmaxModel:
         if self.use_improved_sigmoid:
             self.sigmoid = lambda X: 1.7159*np.tanh(2/3 * X)
             self.sigmoid_der = lambda X: 1.7159*2 / \
-                (3*np.cosh(2*X / 3)**2)  # mby wrong
+                (3*np.cosh(2*X / 3)**2)
         else:
             self.sigmoid = lambda X: 1 / (1 + np.exp(-X))
             self.sigmoid_der = lambda X: self.sigmoid(

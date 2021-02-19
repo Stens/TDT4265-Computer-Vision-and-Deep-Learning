@@ -124,35 +124,6 @@ if __name__ == "__main__":
     print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
     print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
 
-
-    """
-        Will plot both in one image
-    
-    # Plot loss for first model (task 2c)
-    plt.figure(figsize=(20, 12))
-
-    plt.subplot(1, 2, 1)
-    plt.ylim([0., .5])
-    utils.plot_loss(train_history["loss"],
-                    "Training Loss", npoints_to_average=10)
-    utils.plot_loss(val_history["loss"], "Validation Loss")
-    plt.legend()
-    plt.xlabel("Number of Training Steps")
-    plt.ylabel("Cross Entropy Loss - Average")
-
-    # Plot accuracy
-    plt.subplot(1, 2, 2)
-    plt.ylim([0.90, .99])
-    utils.plot_loss(train_history["accuracy"], "Training Accuracy")
-    utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
-    plt.xlabel("Number of Training Steps")
-    plt.ylabel("Accuracy")
-    plt.legend()
-    plt.savefig("task2c_train_loss.png")
-    """
-    """
-        Will plot one plot in one image
-    """
     plt.title("Training and validation loss")
     plt.ylim([0., .5])
     utils.plot_loss(train_history["loss"],
