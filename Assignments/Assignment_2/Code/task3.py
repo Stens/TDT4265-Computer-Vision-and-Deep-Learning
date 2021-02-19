@@ -20,8 +20,9 @@ if __name__ == "__main__":
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)
 
-    def plot_metrics(train_history, val_history, description=["", ""],*,use_val=False):
-        plt.subplot(1, 2, 1)  # Warning
+    def plot_metrics_loss(train_history, val_history, description=["", ""],*,use_val=False):
+        #plt.subplot(1, 2, 1)  # Warning
+        plt.title("Training and Validation loss")
         utils.plot_loss(train_history["loss"],
                         ("Training " + description[0]), npoints_to_average=10)
         if use_val:
@@ -29,8 +30,9 @@ if __name__ == "__main__":
         plt.ylim([0, .6])
         plt.legend(loc="upper left")
         plt.ylabel("Train Loss")
-
-        plt.subplot(1, 2, 2)
+    def plot_metrics_acc(train_history, val_history, description=["", ""],*,use_val=False):
+        #plt.subplot(1, 2, 2)
+        plt.title("Training and Validation accuracy")
         utils.plot_loss(train_history["accuracy"], ("Training " + description[1]))
         if use_val:
             utils.plot_loss(val_history["accuracy"],("Validation " + description[1]))
@@ -38,7 +40,7 @@ if __name__ == "__main__":
         plt.ylabel("Train Accuracy")
         plt.legend(loc="upper right")
 
-    # Setting parameters
+    # First nothing
     use_improved_weight_init = False
     use_improved_sigmoid = False
     use_momentum = False
@@ -53,11 +55,9 @@ if __name__ == "__main__":
         X_train, Y_train, X_val, Y_val,
     )
 
-    train_history, val_history = trainer.train(num_epochs)
-    plot_metrics(train_history, val_history, [
-                 "Loss (no additions)", "Accuracy (no additions)"],use_val=True)
-    
-    # Setting parameters
+    train_history_nothing, val_history_nothing = trainer.train(num_epochs)
+
+    # Adding improved weights
     use_improved_weight_init = True
     use_improved_sigmoid = False
     use_momentum = False
@@ -72,14 +72,25 @@ if __name__ == "__main__":
         X_train, Y_train, X_val, Y_val,
     )
 
-    train_history, val_history = trainer.train(num_epochs)
-    plot_metrics(train_history, val_history, [
-                 "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)   
-    plt.savefig("task3a.png")
+    train_history_im_weights, val_history_im_weights = trainer.train(num_epochs)
+
+
+    plot_metrics_loss(train_history_nothing, val_history_nothing, [
+                 "Loss (no additions)", "Accuracy (no additions)"],use_val=True)
+    plot_metrics_loss(train_history_im_weights, val_history_im_weights, [
+                 "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)
+    plt.savefig("task3a_loss.png")
 
     plt.show()
 
 
+    plot_metrics_acc(train_history_nothing, val_history_nothing, [
+                 "Loss (no additions)", "Accuracy (no additions)"],use_val=True) 
+    plot_metrics_acc(train_history_im_weights, val_history_im_weights, [
+                 "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)   
+    
+    plt.savefig("task3a_acc.png")
+    plt.show()
 
 
 
