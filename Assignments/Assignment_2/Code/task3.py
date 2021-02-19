@@ -20,20 +20,43 @@ if __name__ == "__main__":
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)
 
-    def plot_metrics(train_history, val_history, description=["", ""]):
+    def plot_metrics(train_history, val_history, description=["", ""],*,use_val=False):
         plt.subplot(1, 2, 1)  # Warning
         utils.plot_loss(train_history["loss"],
-                        description[0], npoints_to_average=10)
+                        ("Training " + description[0]), npoints_to_average=10)
+        if use_val:
+            utils.plot_loss(val_history["loss"], ("Validation " + description[0]))
         plt.ylim([0, .6])
         plt.legend(loc="upper left")
         plt.ylabel("Train Loss")
 
         plt.subplot(1, 2, 2)
-        utils.plot_loss(train_history["accuracy"], description[1])
+        utils.plot_loss(train_history["accuracy"], ("Training " + description[1]))
+        if use_val:
+            utils.plot_loss(val_history["accuracy"],("Validation " + description[1]))
         plt.ylim([0.85, 1.])
         plt.ylabel("Train Accuracy")
         plt.legend(loc="upper right")
 
+    # Setting parameters
+    use_improved_weight_init = False
+    use_improved_sigmoid = False
+    use_momentum = False
+
+    model = SoftmaxModel(
+        neurons_per_layer,
+        use_improved_sigmoid,
+        use_improved_weight_init)
+    trainer = SoftmaxTrainer(
+        momentum_gamma, use_momentum,
+        model, learning_rate, batch_size, shuffle_data,
+        X_train, Y_train, X_val, Y_val,
+    )
+
+    train_history, val_history = trainer.train(num_epochs)
+    plot_metrics(train_history, val_history, [
+                 "Loss (no additions)", "Accuracy (no additions)"],use_val=True)
+    
     # Setting parameters
     use_improved_weight_init = True
     use_improved_sigmoid = False
@@ -48,9 +71,28 @@ if __name__ == "__main__":
         model, learning_rate, batch_size, shuffle_data,
         X_train, Y_train, X_val, Y_val,
     )
+
     train_history, val_history = trainer.train(num_epochs)
     plot_metrics(train_history, val_history, [
-                 "Loss (improved weights)", "Accuracy (improved weights)"])
+                 "Loss (improved weights)", "Accuracy (improved weights)"],use_val=True)   
+    plt.savefig("task3a.png")
+
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
     # Setting parameters,
     use_improved_weight_init = True
     use_improved_sigmoid = True
@@ -89,6 +131,4 @@ if __name__ == "__main__":
 
     plot_metrics(train_history, val_history, [
                  "Loss (momentum)", "Accuracy (momentum)"])
-    plt.savefig("task3.png")
-
-    plt.show()
+    """
