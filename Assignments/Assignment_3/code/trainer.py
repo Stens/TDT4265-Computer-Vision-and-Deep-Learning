@@ -24,7 +24,6 @@ def compute_loss_and_accuracy(
     average_loss = 0
     accuracy = 0
     i = 0
-    # TODO: Implement this function (Task  2a)
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
             i += 1
@@ -38,7 +37,7 @@ def compute_loss_and_accuracy(
             average_loss += loss_criterion(output_probs, Y_batch)
             _, predicted = torch.max(
                 output_probs.data, 1)  # use dim=1, since batch_size is dim = 0
-            accuracy += (predicted == Y_batch).sum()/(Y_batch.shape[0])
+            accuracy += (predicted == Y_batch).sum().float()/(Y_batch.shape[0])
 
     average_loss = average_loss/i
     accuracy = accuracy/i
@@ -205,3 +204,9 @@ class Trainer:
                 f"Could not load best checkpoint. Did not find under: {self.checkpoint_dir}")
             return
         self.model.load_state_dict(state_dict)
+
+    def test_model(self):
+        self.load_best_model()
+        loss, accuracy = compute_loss_and_accuracy(
+            self.dataloader_test, self.model, self.loss_criterion)
+        print(f"Average test loss is {loss} and accuracy is {accuracy}")
