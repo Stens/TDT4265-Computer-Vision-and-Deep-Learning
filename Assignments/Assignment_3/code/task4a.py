@@ -1,9 +1,12 @@
 from torchvision import transforms, datasets, models
+import torchvision
 import torch
 import utils
 import typing
+from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
+
 
 from trainer import Trainer
 import numpy as np
@@ -66,6 +69,24 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1) -> typing.Li
     return dataloader_train, dataloader_val, dataloader_test
 
 
+class TransferModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.model = torchvision.models.resnet18(pretrained=True)
+        self.model.fc = nn.Linear(512, 10)  # No need to apply softmax,
+        # as this is done in nn.CrossEntropyLoss
+        for param in self.model.parameters():  # Freeze all parameters
+            param.requires_grad = False
+        for param in self.model.fc.parameters():  # Unfreeze the last fully-connected
+            param.requires_grad = True  # layer
+        for param in self.model.layer4.parameters():  # Unfreeze the last 5 convolutional
+            param.requires_grad = True  # layers
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
+
 if __name__ == "__main__":
     # Set the random generator seed (parameters, shuffling etc).
     # You can try to change this and check if you still get the same result!
@@ -75,7 +96,7 @@ if __name__ == "__main__":
     learning_rate = 5e-4
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = models.resnet18(pretrained=True)
+    model = TransferModel()
     trainer = Trainer(
         batch_size,
         learning_rate,
