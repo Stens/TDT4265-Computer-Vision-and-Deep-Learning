@@ -124,9 +124,9 @@ class ConvModel(ExampleModel):
         super().__init__(image_channels, num_classes)
         num_filters = 32  # Set number of filters in first conv layer
         self.num_classes = num_classes
-        kernel = 3
+        kernel = 5
         activation_func = nn.ReLU
-        dropout_p = 0.1
+        dropout_p = 0.05
 
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
@@ -137,11 +137,8 @@ class ConvModel(ExampleModel):
                 stride=1,
                 padding=2
             ),
-            # nn.BatchNorm2d(32),
+            nn.BatchNorm2d(32),
             activation_func(),
-            #             nn.Dropout2d(p=dropout_p),
-            nn.MaxPool2d([2, 2], stride=2),
-
             nn.Conv2d(
                 in_channels=num_filters,
                 out_channels=64,
@@ -149,9 +146,7 @@ class ConvModel(ExampleModel):
                 stride=1,
                 padding=2
             ),
-            nn.BatchNorm2d(64),
             activation_func(),
-            #             nn.Dropout2d(p=dropout_p),
             nn.MaxPool2d([2, 2], stride=2),
 
 
@@ -164,13 +159,21 @@ class ConvModel(ExampleModel):
             ),
             nn.BatchNorm2d(128),
             activation_func(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=128,
+                kernel_size=kernel,
+                stride=1,
+                padding=2
+            ),
+            activation_func(),
             nn.Dropout2d(p=dropout_p),
             nn.MaxPool2d([2, 2], stride=2),
         )
 
         # Initialize our last fully connected layer
         # The output of feature_extractor will be [batch_size, num_filters, 4, 4]
-        self.num_output_features = 128*5*5
+        self.num_output_features = 128*8*8
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
         # There is no need for softmax activation function, as this is
@@ -179,6 +182,23 @@ class ConvModel(ExampleModel):
             nn.Linear(self.num_output_features, 64),
             nn.BatchNorm1d(64),
             activation_func(),
+            nn.Dropout(p=dropout_p),
+
+            nn.Linear(64, 64),
+            nn.BatchNorm1d(64),
+            activation_func(),
+            nn.Dropout(p=dropout_p),
+
+            nn.Linear(64, 64),
+            nn.BatchNorm1d(64),
+            activation_func(),
+            nn.Dropout(p=dropout_p),
+
+            nn.Linear(64, 64),
+            nn.BatchNorm1d(64),
+            activation_func(),
+            nn.Dropout(p=dropout_p),
+
             nn.Linear(64, num_classes),
         )
 
@@ -189,9 +209,10 @@ if __name__ == "__main__":
     utils.set_seed(0)
     epochs = 10
     batch_size = 64
-    learning_rate = 5e-2
+    learning_rate = 4e-2
     early_stop_count = 4
     dataloaders = load_cifar10_augemted(batch_size)
+    # Use SGD
     model = ConvModel(image_channels=3, num_classes=10)
     trainer = Trainer(
         batch_size,

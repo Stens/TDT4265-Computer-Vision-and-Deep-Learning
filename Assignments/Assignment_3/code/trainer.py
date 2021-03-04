@@ -206,6 +206,12 @@ class Trainer:
 
     def test_model(self):
         self.load_best_model()
-        loss, accuracy = compute_loss_and_accuracy(
+        loss_test, accuracy_test = compute_loss_and_accuracy(
             self.dataloader_test, self.model, self.loss_criterion)
-        print(f"Average test loss is {loss} and accuracy is {accuracy}")
+        print(
+            f"Average test loss is {loss_test} and accuracy is {accuracy_test}")
+
+        loss_train, accuracy_train = compute_loss_and_accuracy(
+            self.dataloader_train, self.model, self.loss_criterion)
+        print(
+            f"Average train loss is {loss_train} and accuracy is {accuracy_train}")
