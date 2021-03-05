@@ -42,6 +42,7 @@ from torchvision import transforms, datasets
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import DataLoader
 import typing
+import torch
 import numpy as np
 
 
@@ -53,15 +54,11 @@ def load_cifar10_augemted(batch_size: int, validation_fraction: float = 0.1) -> 
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
-        # #       Randomly apply augmentations
-        #         transforms.RandomApply([
-        #             transforms.RandomCrop(32, padding=4),
-        #             transforms.RandomHorizontalFlip(),
-        #             transforms.RandomRotation(10),
-        #             transforms.RandomPerspective(),
-        #             transforms.ColorJitter(0.5,0.5,0.5,0.5),
-        #         ], p=0.5),
-        # transforms.RandomRotation(10),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+
+    transform_train_augmented = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -77,6 +74,14 @@ def load_cifar10_augemted(batch_size: int, validation_fraction: float = 0.1) -> 
                                   train=True,
                                   download=True,
                                   transform=transform_train)
+
+    augmented_train = datasets.CIFAR10('data/cifar10',
+                                       train=True,
+                                       download=True,
+                                       transform=transform_train_augmented)
+
+    data_train = torch.utils.data.ConcatDataset(
+        (data_train, augmented_train))
 
     data_test = datasets.CIFAR10('data/cifar10',
                                  train=False,
@@ -126,7 +131,7 @@ class ConvModel(ExampleModel):
         self.num_classes = num_classes
         kernel = 5
         activation_func = nn.ReLU
-        dropout_p = 0.05
+        dropout_p = 0.0
 
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
@@ -143,11 +148,10 @@ class ConvModel(ExampleModel):
                 in_channels=num_filters,
                 out_channels=64,
                 kernel_size=kernel,
-                stride=1,
+                stride=2,
                 padding=2
             ),
             activation_func(),
-            nn.MaxPool2d([2, 2], stride=2),
 
 
             nn.Conv2d(
@@ -163,12 +167,11 @@ class ConvModel(ExampleModel):
                 in_channels=128,
                 out_channels=128,
                 kernel_size=kernel,
-                stride=1,
+                stride=2,
                 padding=2
             ),
             activation_func(),
             nn.Dropout2d(p=dropout_p),
-            nn.MaxPool2d([2, 2], stride=2),
         )
 
         # Initialize our last fully connected layer
@@ -179,25 +182,21 @@ class ConvModel(ExampleModel):
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, 64),
+            nn.Linear(self.num_output_features, 128),
+            nn.BatchNorm1d(128),
+            activation_func(),
+
+            nn.Linear(128, 64),
             nn.BatchNorm1d(64),
             activation_func(),
-            nn.Dropout(p=dropout_p),
 
             nn.Linear(64, 64),
             nn.BatchNorm1d(64),
             activation_func(),
-            nn.Dropout(p=dropout_p),
 
             nn.Linear(64, 64),
             nn.BatchNorm1d(64),
             activation_func(),
-            nn.Dropout(p=dropout_p),
-
-            nn.Linear(64, 64),
-            nn.BatchNorm1d(64),
-            activation_func(),
-            nn.Dropout(p=dropout_p),
 
             nn.Linear(64, num_classes),
         )
@@ -209,7 +208,7 @@ if __name__ == "__main__":
     utils.set_seed(0)
     epochs = 10
     batch_size = 64
-    learning_rate = 4e-2
+    learning_rate = 5e-2
     early_stop_count = 4
     dataloaders = load_cifar10_augemted(batch_size)
     # Use SGD
