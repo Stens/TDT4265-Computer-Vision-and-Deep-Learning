@@ -57,13 +57,13 @@ def load_cifar10_old(batch_size: int, validation_fraction: float = 0.1) -> typin
     transform_train = transforms.Compose([
         # #       Randomly apply augmentations
         #         transforms.RandomApply([
-        #             transforms.RandomCrop(32, padding=4),
+                     transforms.RandomCrop(32, padding=4),
         #             transforms.RandomHorizontalFlip(),
         #             transforms.RandomRotation(10),
         #             transforms.RandomPerspective(),
         #             transforms.ColorJitter(0.5,0.5,0.5,0.5),
         #         ], p=0.5),
-        transforms.RandomRotation(10),
+        #transforms.RandomRotation(10),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
@@ -253,18 +253,22 @@ class ConvModel(ExampleModel):
             nn.Linear(self.num_output_features, 64), # 128
             nn.BatchNorm1d(64), # 128
             activation_func(),
+            nn.Dropout2d(p=dropout_p),
 
             nn.Linear(64, 64), # 128
             nn.BatchNorm1d(64),
             activation_func(),
+            nn.Dropout2d(p=dropout_p),
 
             nn.Linear(64, 64),
             nn.BatchNorm1d(64),
             activation_func(),
+            nn.Dropout2d(p=dropout_p),
 
             nn.Linear(64, 64),
             nn.BatchNorm1d(64),
             activation_func(),
+            nn.Dropout2d(p=dropout_p),
 
             nn.Linear(64, num_classes),
         )
@@ -276,7 +280,7 @@ if __name__ == "__main__":
     utils.set_seed(0)
     epochs = 10
     batch_size = 64
-    learning_rate = 3.5e-2
+    learning_rate = 4e-2
     early_stop_count = 4
     dataloaders = load_cifar10_old(batch_size)
     # Use SGD
@@ -291,5 +295,4 @@ if __name__ == "__main__":
     )
     trainer.train()
     trainer.test_model()
-
-    create_plots(trainer, "task3e")
+    create_plots(trainer, "task3")

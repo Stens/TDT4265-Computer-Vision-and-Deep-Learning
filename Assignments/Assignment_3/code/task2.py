@@ -86,6 +86,8 @@ def create_plots(trainer: Trainer, name: str):
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.title("Cross Entropy Loss")
+    plt.xlabel("Training steps")
+    plt.ylabel("Accuracy")
     utils.plot_loss(
         trainer.train_history["loss"], label="Training loss", npoints_to_average=10)
     utils.plot_loss(
@@ -93,6 +95,8 @@ def create_plots(trainer: Trainer, name: str):
     plt.legend()
     plt.subplot(1, 2, 2)
     plt.title("Accuracy")
+    plt.xlabel("Training steps")
+    plt.ylabel("Accuracy")
     utils.plot_loss(
         trainer.validation_history["accuracy"], label="Validation Accuracy")
     plt.legend()
