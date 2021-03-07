@@ -18,7 +18,6 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        # TODO: Implement this function (Task  2a)
         num_filters = 32  # Set number of filters in first conv layer
         self.num_classes = num_classes
         # Define the convolutional layers
@@ -29,17 +28,39 @@ class ExampleModel(nn.Module):
                 kernel_size=5,
                 stride=1,
                 padding=2
-            )
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d([2, 2], stride=2),
+            nn.Conv2d(
+                in_channels=num_filters,
+                out_channels=64,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d([2, 2], stride=2),
+            nn.Conv2d(
+                in_channels=64,
+                out_channels=128,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d([2, 2], stride=2),
         )
-        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 32*32*32
+        # The output of feature_extractor will be [batch_size, num_filters, 4, 4]
+        self.num_output_features = 128*4*4
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, num_classes),
+            nn.Linear(self.num_output_features, 64),
+            nn.ReLU(),
+            nn.Linear(64, num_classes),
         )
 
     def forward(self, x):
@@ -48,9 +69,10 @@ class ExampleModel(nn.Module):
         Args:
             x: Input image, shape: [batch_size, 3, 32, 32]
         """
-        # TODO: Implement this function (Task  2a)
         batch_size = x.shape[0]
-        out = x
+        features = self.feature_extractor(x)
+        linear_features = features.view(-1, self.num_output_features)
+        out = self.classifier(linear_features)
         expected_shape = (batch_size, self.num_classes)
         assert out.shape == (batch_size, self.num_classes),\
             f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
@@ -64,12 +86,19 @@ def create_plots(trainer: Trainer, name: str):
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.title("Cross Entropy Loss")
-    utils.plot_loss(trainer.train_history["loss"], label="Training loss", npoints_to_average=10)
-    utils.plot_loss(trainer.validation_history["loss"], label="Validation loss")
+    plt.xlabel("Training steps")
+    plt.ylabel("Accuracy")
+    utils.plot_loss(
+        trainer.train_history["loss"], label="Training loss", npoints_to_average=10)
+    utils.plot_loss(
+        trainer.validation_history["loss"], label="Validation loss")
     plt.legend()
     plt.subplot(1, 2, 2)
     plt.title("Accuracy")
-    utils.plot_loss(trainer.validation_history["accuracy"], label="Validation Accuracy")
+    plt.xlabel("Training steps")
+    plt.ylabel("Accuracy")
+    utils.plot_loss(
+        trainer.validation_history["accuracy"], label="Validation Accuracy")
     plt.legend()
     plt.savefig(plot_path.joinpath(f"{name}_plot.png"))
     plt.show()
@@ -77,7 +106,7 @@ def create_plots(trainer: Trainer, name: str):
 
 if __name__ == "__main__":
     # Set the random generator seed (parameters, shuffling etc).
-    # You can try to change this and check if you still get the same result! 
+    # You can try to change this and check if you still get the same result!
     utils.set_seed(0)
     epochs = 10
     batch_size = 64

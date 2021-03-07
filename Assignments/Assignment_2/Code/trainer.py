@@ -1,106 +1,207 @@
-import numpy as np
+
+import torch
+import typing
+import time
+import collections
 import utils
+import pathlib
 
 
-class BaseTrainer:
+def compute_loss_and_accuracy(
+        dataloader: torch.utils.data.DataLoader,
+        model: torch.nn.Module,
+        loss_criterion: torch.nn.modules.loss._Loss):
+    """
+    Computes the average loss and the accuracy over the whole dataset
+    in dataloader.
+    Args:
+        dataloder: Validation/Test dataloader
+        model: torch.nn.Module
+        loss_criterion: The loss criterion, e.g: torch.nn.CrossEntropyLoss()
+    Returns:
+        [average_loss, accuracy]: both scalar.
+    """
+    average_loss = 0
+    accuracy = 0
+    i = 0
+    # TODO: Implement this function (Task  2a)
+    with torch.no_grad():
+        for (X_batch, Y_batch) in dataloader:
+            i += 1
+            # Transfer images/labels to GPU VRAM, if possible
+            X_batch = utils.to_cuda(X_batch)
+            Y_batch = utils.to_cuda(Y_batch)
+            # Forward pass the images through our model
+            output_probs = model(X_batch)
 
-    def __init__(
-            self,
-            model,
-            learning_rate: float,
-            batch_size: int,
-            shuffle_dataset: bool,
-            X_train: np.ndarray, Y_train: np.ndarray,
-            X_val: np.ndarray, Y_val: np.ndarray,) -> None:
+            # Compute Loss and Accuracy
+            average_loss += loss_criterion(output_probs, Y_batch)
+            _, predicted = torch.max(
+                output_probs.data, 1)  # use dim=1, since batch_size is dim = 0
+            accuracy += (predicted == Y_batch).sum()/(Y_batch.shape[0])
+
+    average_loss = average_loss/i
+    accuracy = accuracy/i
+    return average_loss.detach().cpu().float(), accuracy.detach().cpu().float()
+
+
+class Trainer:
+
+    def __init__(self,
+                 batch_size: int,
+                 learning_rate: float,
+                 early_stop_count: int,
+                 epochs: int,
+                 model: torch.nn.Module,
+                 dataloaders: typing.List[torch.utils.data.DataLoader]):
         """
-            Initialize the trainer responsible for performing the gradient descent loop.
+            Initialize our trainer class.
         """
-        self.X_train = X_train
-        self.Y_train = Y_train
-        self.X_val = X_val
-        self.Y_val = Y_val
-        self.learning_rate = learning_rate
         self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.early_stop_count = early_stop_count
+        self.epochs = epochs
+
+        # Since we are doing multi-class classification, we use CrossEntropyLoss
+        self.loss_criterion = torch.nn.CrossEntropyLoss()
+        # Initialize the model
         self.model = model
-        self.shuffle_dataset = shuffle_dataset
-        self.stop_at_count = 50
+        # Transfer model to GPU VRAM, if possible.
+        self.model = utils.to_cuda(self.model)
+        print(self.model)
+
+        # Define our optimizer. SGD = Stochastich Gradient Descent
+        self.optimizer = torch.optim.SGD(self.model.parameters(),
+                                         self.learning_rate)
+
+        # Load our dataset
+        self.dataloader_train, self.dataloader_val, self.dataloader_test = dataloaders
+
+        # Validate our model everytime we pass through 50% of the dataset
+        self.num_steps_per_val = len(self.dataloader_train) // 2
+        self.global_step = 0
+        self.start_time = time.time()
+
+        # Tracking variables
+        self.train_history = dict(
+            loss=collections.OrderedDict(),
+            accuracy=collections.OrderedDict()
+
+        )
+        self.validation_history = dict(
+            loss=collections.OrderedDict(),
+            accuracy=collections.OrderedDict()
+        )
+        self.checkpoint_dir = pathlib.Path("checkpoints")
 
     def validation_step(self):
         """
-        Perform a validation step to evaluate the model at the current step for the validation set.
-        Also calculates the current accuracy of the model on the train set.
-        Returns:
-            loss (float): cross entropy loss over the whole dataset
-            accuracy_ (float): accuracy over the whole dataset
-        Returns:
-            loss value (float) on batch
-            accuracy_train (float): Accuracy on train dataset
-            accuracy_val (float): Accuracy on the validation dataset
+            Computes the loss/accuracy for all three datasets.
+            Train, validation and test.
         """
-        pass
+        self.model.eval()
+        validation_loss, validation_acc = compute_loss_and_accuracy(
+            self.dataloader_val, self.model, self.loss_criterion
+        )
+        self.validation_history["loss"][self.global_step] = validation_loss
+        self.validation_history["accuracy"][self.global_step] = validation_acc
+        used_time = time.time() - self.start_time
+        print(
+            f"Epoch: {self.epoch:>1}",
+            f"Batches per seconds: {self.global_step / used_time:.2f}",
+            f"Global step: {self.global_step:>6}",
+            f"Validation Loss: {validation_loss:.2f}",
+            f"Validation Accuracy: {validation_acc:.3f}",
+            sep=", ")
+        self.model.train()
 
-    def train_step(self):
+    def should_early_stop(self):
         """
-            Perform forward, backward and gradient descent step here.
+            Checks if validation loss doesn't improve over early_stop_count epochs.
+        """
+        # Check if we have more than early_stop_count elements in our validation_loss list.
+        val_loss = self.validation_history["loss"]
+        if len(val_loss) < self.early_stop_count:
+            return False
+        # We only care about the last [early_stop_count] losses.
+        relevant_loss = list(val_loss.values())[-self.early_stop_count:]
+        first_loss = relevant_loss[0]
+        if first_loss == min(relevant_loss):
+            print("Early stop criteria met")
+            return True
+        return False
+
+    def train_step(self, X_batch, Y_batch):
+        """
+        Perform forward, backward and gradient descent step here.
+        The function is called once for every batch (see trainer.py) to perform the train step.
+        The function returns the mean loss value which is then automatically logged in our variable self.train_history.
+
         Args:
             X: one batch of images
             Y: one batch of labels
         Returns:
             loss value (float) on batch
         """
-        pass
+        # X_batch is the CIFAR10 images. Shape: [batch_size, 3, 32, 32]
+        # Y_batch is the CIFAR10 image label. Shape: [batch_size]
+        # Transfer images / labels to GPU VRAM, if possible
+        X_batch = utils.to_cuda(X_batch)
+        Y_batch = utils.to_cuda(Y_batch)
 
-    def train(
-            self,
-            num_epochs: int):
-        """
-        Training loop for model.
-        Implements stochastic gradient descent with num_epochs passes over the train dataset.
-        Returns:
-            train_history: a dictionary containing loss and accuracy over all training steps
-            val_history: a dictionary containing loss and accuracy over a selected set of steps
-        """
-        # Utility variables
-        num_batches_per_epoch = self.X_train.shape[0] // self.batch_size
-        num_steps_per_val = num_batches_per_epoch // 5
-        # A tracking value of loss over all training steps
-        train_history = dict(
-            loss={},
-            accuracy={}
-        )
-        val_history = dict(
-            loss={},
-            accuracy={}
-        )
+        # Perform the forward pass
+        predictions = self.model(X_batch)
+        # Compute the cross entropy loss for the batch
+        loss = self.loss_criterion(predictions, Y_batch)
+        # Backpropagation
+        loss.backward()
+        # Gradient descent step
+        self.optimizer.step()
+        # Reset all computed gradients to 0
+        self.optimizer.zero_grad()
 
-        global_step = 0
-        prev_best_loss = np.inf
-        for epoch in range(num_epochs):
-            train_loader = utils.batch_loader(
-                self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
-            for X_batch, Y_batch in iter(train_loader):
+        return loss.detach().cpu().item()
+
+    def train(self):
+        """
+        Trains the model for [self.epochs] epochs.
+        """
+        def should_validate_model():
+            return self.global_step % self.num_steps_per_val == 0
+
+        for epoch in range(self.epochs):
+            self.epoch = epoch
+            # Perform a full pass through all the training samples
+            for X_batch, Y_batch in self.dataloader_train:
                 loss = self.train_step(X_batch, Y_batch)
-                # Track training loss continuously
-                train_history["loss"][global_step] = loss
+                self.train_history["loss"][self.global_step] = loss
+                self.global_step += 1
+                # Compute loss/accuracy for validation set
+                if should_validate_model():
+                    self.validation_step()
+                    self.save_model()
+                    if self.should_early_stop():
+                        print("Early stopping.")
+                        return
 
-                # Track validation loss / accuracy every time we progress 20% through the dataset
-                if global_step % num_steps_per_val == 0:
-                    val_loss, accuracy_train, accuracy_val = self.validation_step()
-                    train_history["accuracy"][global_step] = accuracy_train
-                    val_history["loss"][global_step] = val_loss
-                    val_history["accuracy"][global_step] = accuracy_val
+    def save_model(self):
+        def is_best_model():
+            """
+                Returns True if current model has the lowest validation loss
+            """
+            val_loss = self.validation_history["loss"]
+            validation_losses = list(val_loss.values())
+            return validation_losses[-1] == min(validation_losses)
 
-                    if self.stop_at_count:
-                        # No improvement
-                        if prev_best_loss < val_loss:
-                            counter += 1
-                        else:
-                            counter = 0
-                            prev_best_loss = val_loss
-                        # We have reached max number of passes trough dataset without improvement
-                        if counter == self.stop_at_count:
-                            print(
-                                f"We went trough {epoch} of {num_epochs} epochs before stopping")
-                            return train_history, val_history
-                global_step += 1
-        return train_history, val_history
+        state_dict = self.model.state_dict()
+        filepath = self.checkpoint_dir.joinpath(f"{self.global_step}.ckpt")
+
+        utils.save_checkpoint(state_dict, filepath, is_best_model())
+
+    def load_best_model(self):
+        state_dict = utils.load_best_checkpoint(self.checkpoint_dir)
+        if state_dict is None:
+            print(
+                f"Could not load best checkpoint. Did not find under: {self.checkpoint_dir}")
+            return
+        self.model.load_state_dict(state_dict)

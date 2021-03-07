@@ -1,4 +1,3 @@
-
 import torch
 import typing
 import time
@@ -23,9 +22,10 @@ def compute_loss_and_accuracy(
     """
     average_loss = 0
     accuracy = 0
-    # TODO: Implement this function (Task  2a)
+    i = 0
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
+            i += 1
             # Transfer images/labels to GPU VRAM, if possible
             X_batch = utils.to_cuda(X_batch)
             Y_batch = utils.to_cuda(Y_batch)
@@ -33,8 +33,14 @@ def compute_loss_and_accuracy(
             output_probs = model(X_batch)
 
             # Compute Loss and Accuracy
+            average_loss += loss_criterion(output_probs, Y_batch)
+            _, predicted = torch.max(
+                output_probs.data, 1)  # use dim=1, since batch_size is dim = 0
+            accuracy += (predicted == Y_batch).sum().float()/(Y_batch.shape[0])
 
-    return average_loss, accuracy
+    average_loss = average_loss/i
+    accuracy = accuracy/i
+    return average_loss.detach().cpu().float(), accuracy.detach().cpu().float()
 
 
 class Trainer:
@@ -197,3 +203,15 @@ class Trainer:
                 f"Could not load best checkpoint. Did not find under: {self.checkpoint_dir}")
             return
         self.model.load_state_dict(state_dict)
+
+    def test_model(self):
+        self.load_best_model()
+        loss_test, accuracy_test = compute_loss_and_accuracy(
+            self.dataloader_test, self.model, self.loss_criterion)
+        print(
+            f"Average test loss is {loss_test} and accuracy is {accuracy_test}")
+
+        loss_train, accuracy_train = compute_loss_and_accuracy(
+            self.dataloader_train, self.model, self.loss_criterion)
+        print(
+            f"Average train loss is {loss_train} and accuracy is {accuracy_train}")
