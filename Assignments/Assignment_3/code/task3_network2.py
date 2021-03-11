@@ -1,36 +1,3 @@
-# -*- coding: utf-8 -*-
-# Things to try:
-
-"""
-• Data Augmentation: Data augmentation is a simple trick to extend your training set. To use
-this, get familiar with the torchvision transforms abstraction.
-
-• Filter size: The starting architecture has 5x5 filters; would small filter sizes work better?
-
-• Number of filters: The starting architecture has 32, 64 and 128 filters. Do more of less work
-better?
-
-• Pooling vs strided convolutions: Pooling is used to reduce the input shape in the width and
-height dimension. Strided convolution can also be used for this (S > 1).
-
-• Batch normalization: Try adding spatial batch normalization after convolution layers and 1-
-dimensional batch normalization after fully-connected layers. Do your networks train faster?
-    -CHECK
-
-• Network architecture: The network above has two layers of trainable parameters. Can you do
-better with a deep network? Good architectures to try include:
-– (conv-relu-pool)xN → (affine)xM → softmax
-– (conv-relu-conv-relu-pool)xN → (affine)xM → softmax
-– (batchnorm-relu-conv)xN → (affine)xM → softmax
-
-• Regularization: Add L2 weight regularization, or perhaps use Dropout.
-
-• Optimizers: Try out a different optimizer than SGD.
-
-• Activation Functions: Try replacing all the ReLU activation function.
-    """
-
-
 import pathlib
 import matplotlib.pyplot as plt
 import utils
@@ -53,14 +20,6 @@ def load_cifar10_augemted(batch_size: int, validation_fraction: float = 0.1) -> 
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
-        # #       Randomly apply augmentations
-        #         transforms.RandomApply([
-        #             transforms.RandomCrop(32, padding=4),
-        #             transforms.RandomHorizontalFlip(),
-        #             transforms.RandomRotation(10),
-        #             transforms.RandomPerspective(),
-        #             transforms.ColorJitter(0.5,0.5,0.5,0.5),
-        #         ], p=0.5),
         transforms.RandomRotation(10),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),

@@ -8,9 +8,27 @@ from task4b import torch_image_to_numpy
 
 
 def plot_conv_output(model, model_in, model_out):
-    f, axarr = plt.subplots(1, 10)
-    for i in range(10):
-        axarr[i].imshow(torch_image_to_numpy(model_out[0][i]), cmap="gray")
+    zebra = Image.open("assignment3/images/zebra.jpg")
+    f, axarr = plt.subplots(2, 5)
+    for i in range(5):
+        activation = (torch_image_to_numpy(
+            model_out[0][i])*255).astype(np.uint8)
+        activation = Image.fromarray(activation)
+        activation = activation.resize((224, 224), resample=Image.NEAREST)
+        axarr[0, i].imshow(activation)
+        axarr[0, i].imshow(zebra, alpha=0.5)
+        axarr[0, i].axis('off')
+    j = 5
+    for i in range(5):
+        activation = (torch_image_to_numpy(
+            model_out[0][j])*255).astype(np.uint8)
+        activation = Image.fromarray(activation)
+        activation = activation.resize((224, 224), resample=Image.NEAREST)
+        axarr[1, i].imshow(activation)
+        axarr[1, i].imshow(zebra, alpha=0.5)
+        axarr[1, i].axis('off')
+        j += 1
+
     plt.show()
 
 

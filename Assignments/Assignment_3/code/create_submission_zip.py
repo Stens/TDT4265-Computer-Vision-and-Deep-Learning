@@ -21,12 +21,16 @@ def query(question, options):
 # If you create other files, edit this list to include them in the .zip file.
 files_to_include = {
     "task2": [".py"],
-    "task2_train": [".ipynb"],
     "task4b": [".py"],
     "trainer": [".py"],
     "utils": [".py"],
-    "mnist": [".py"],
-    "dataloaders": [".py"]
+    "dataloaders": [".py"],
+    "task4a": [".py"],
+    "task4c": [".py"],
+    "task3d": [".py"],
+    "task3_network1": [".py"],
+    "task3_network2": [".py"],
+    "task3_improved_network": [".py"]
 }
 zipfile_path = "assignment_code.zip"
 print("-"*80)

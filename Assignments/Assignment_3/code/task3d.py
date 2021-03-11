@@ -51,17 +51,17 @@ std = (.25, .25, .25)
 
 
 # Used to plot two models in task 3d.
-def create_plots2(trainer1: Trainer,trainer2: Trainer, name: str):
+def create_plots2(trainer1: Trainer, trainer2: Trainer, name: str):
     plot_path = pathlib.Path("plots")
     plot_path.mkdir(exist_ok=True)
-    
+
     # Save plots and show them
     plt.figure(figsize=(20, 8))
     #plt.subplot(1, 2, 1)
     plt.title("Cross Entropy Loss with and without data augmentation.")
     plt.xlabel("Training steps")
     plt.ylabel("Cross Entropy Loss")
-    
+
     # Plot 1 model
     utils.plot_loss(
         trainer1.train_history["loss"], label="No data aug: Training loss", npoints_to_average=10)
@@ -85,19 +85,12 @@ def create_plots2(trainer1: Trainer,trainer2: Trainer, name: str):
     plt.show()
 
 # Loads augmented CIFAR dataset.
+
+
 def load_cifar10_augemted(batch_size: int, validation_fraction: float = 0.1) -> typing.List[DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
-        # #       Randomly apply augmentations
-        #         transforms.RandomApply([
-        #             transforms.RandomCrop(32, padding=4),
-        #             transforms.RandomHorizontalFlip(),
-        #             transforms.RandomRotation(10),
-        #             transforms.RandomPerspective(),
-        #             transforms.ColorJitter(0.5,0.5,0.5,0.5),
-        #         ], p=0.5),
-        # transforms.RandomRotation(10),
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -279,8 +272,5 @@ if __name__ == "__main__":
     )
     trainer_aug.train()
     trainer_aug.test_model()
-    
-    
-    
-    
-    create_plots2(trainer_no_aug,trainer_aug, "task3d")
+
+    create_plots2(trainer_no_aug, trainer_aug, "task3d")

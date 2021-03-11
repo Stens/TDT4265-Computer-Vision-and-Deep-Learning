@@ -1,36 +1,3 @@
-# -*- coding: utf-8 -*-
-# Things to try:
-
-"""
-• Data Augmentation: Data augmentation is a simple trick to extend your training set. To use
-this, get familiar with the torchvision transforms abstraction.
-
-• Filter size: The starting architecture has 5x5 filters; would small filter sizes work better?
-
-• Number of filters: The starting architecture has 32, 64 and 128 filters. Do more of less work
-better?
-
-• Pooling vs strided convolutions: Pooling is used to reduce the input shape in the width and
-height dimension. Strided convolution can also be used for this (S > 1).
-
-• Batch normalization: Try adding spatial batch normalization after convolution layers and 1-
-dimensional batch normalization after fully-connected layers. Do your networks train faster?
-    -CHECK
-
-• Network architecture: The network above has two layers of trainable parameters. Can you do
-better with a deep network? Good architectures to try include:
-– (conv-relu-pool)xN → (affine)xM → softmax
-– (conv-relu-conv-relu-pool)xN → (affine)xM → softmax
-– (batchnorm-relu-conv)xN → (affine)xM → softmax
-
-• Regularization: Add L2 weight regularization, or perhaps use Dropout.
-
-• Optimizers: Try out a different optimizer than SGD.
-
-• Activation Functions: Try replacing all the ReLU activation function.
-    """
-
-
 import pathlib
 import matplotlib.pyplot as plt
 import utils
@@ -50,19 +17,10 @@ mean = (0.5, 0.5, 0.5)
 std = (.25, .25, .25)
 
 
-
-def load_cifar10_old(batch_size: int, validation_fraction: float = 0.1) -> typing.List[DataLoader]:
+def load_cifar10_augmented(batch_size: int, validation_fraction: float = 0.1) -> typing.List[DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
-        # #       Randomly apply augmentations
-        #         transforms.RandomApply([
-        #             transforms.RandomCrop(32, padding=4),
-        #             transforms.RandomHorizontalFlip(),
-        #             transforms.RandomRotation(10),
-        #             transforms.RandomPerspective(),
-        #             transforms.ColorJitter(0.5,0.5,0.5,0.5),
-        #         ], p=0.5),
         transforms.RandomRotation(10),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -78,71 +36,6 @@ def load_cifar10_old(batch_size: int, validation_fraction: float = 0.1) -> typin
                                   train=True,
                                   download=True,
                                   transform=transform_train)
-
-    data_test = datasets.CIFAR10('data/cifar10',
-                                 train=False,
-                                 download=True,
-                                 transform=transform_test)
-
-    indices = list(range(len(data_train)))
-    split_idx = int(np.floor(validation_fraction * len(data_train)))
-
-    val_indices = np.random.choice(indices, size=split_idx, replace=False)
-    train_indices = list(set(indices) - set(val_indices))
-
-    train_sampler = SubsetRandomSampler(train_indices)
-    validation_sampler = SubsetRandomSampler(val_indices)
-
-    dataloader_train = DataLoader(data_train,
-                                  sampler=train_sampler,
-                                  batch_size=batch_size,
-                                  num_workers=2,
-                                  drop_last=True)
-
-    dataloader_val = DataLoader(data_train,
-                                sampler=validation_sampler,
-                                batch_size=batch_size,
-                                num_workers=2)
-
-    dataloader_test = DataLoader(data_test,
-                                 batch_size=batch_size,
-                                 shuffle=False,
-                                 num_workers=2)
-
-    return dataloader_train, dataloader_val, dataloader_test
-
-def load_cifar10_augemted(batch_size: int, validation_fraction: float = 0.1) -> typing.List[DataLoader]:
-    # Note that transform train will apply the same transform for
-    # validation!
-    transform_train = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
-
-    transform_train_augmented = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
-
-    transform_test = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std)
-    ])
-
-    data_train = datasets.CIFAR10('data/cifar10',
-                                  train=True,
-                                  download=True,
-                                  transform=transform_train)
-
-    augmented_train = datasets.CIFAR10('data/cifar10',
-                                       train=True,
-                                       download=True,
-                                       transform=transform_train_augmented)
-
-    data_train = torch.utils.data.ConcatDataset(
-        (data_train, augmented_train))
 
     data_test = datasets.CIFAR10('data/cifar10',
                                  train=False,
@@ -250,11 +143,11 @@ class ConvModel(ExampleModel):
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, 64), # 128
-            nn.BatchNorm1d(64), # 128
+            nn.Linear(self.num_output_features, 64),
+            nn.BatchNorm1d(64),
             activation_func(),
 
-            nn.Linear(64, 64), # 128
+            nn.Linear(64, 64),
             nn.BatchNorm1d(64),
             activation_func(),
 
@@ -278,7 +171,7 @@ if __name__ == "__main__":
     batch_size = 64
     learning_rate = 3.5e-2
     early_stop_count = 4
-    dataloaders = load_cifar10_old(batch_size)
+    dataloaders = load_cifar10_augmented(batch_size)
     # Use SGD
     model = ConvModel(image_channels=3, num_classes=10)
     trainer = Trainer(

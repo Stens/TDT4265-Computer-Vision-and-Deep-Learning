@@ -7,7 +7,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
-
+from task2 import create_plots
 from trainer import Trainer
 import numpy as np
 
@@ -106,4 +106,5 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
+    trainer.test_model()
     create_plots(trainer, "task4a")

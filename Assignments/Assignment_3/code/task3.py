@@ -50,19 +50,10 @@ mean = (0.5, 0.5, 0.5)
 std = (.25, .25, .25)
 
 
-
 def load_cifar10_old(batch_size: int, validation_fraction: float = 0.1) -> typing.List[DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
-        # #       Randomly apply augmentations
-        #         transforms.RandomApply([
-        #             transforms.RandomCrop(32, padding=4),
-        #             transforms.RandomHorizontalFlip(),
-        #             transforms.RandomRotation(10),
-        #             transforms.RandomPerspective(),
-        #             transforms.ColorJitter(0.5,0.5,0.5,0.5),
-        #         ], p=0.5),
         transforms.RandomRotation(10),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -110,6 +101,7 @@ def load_cifar10_old(batch_size: int, validation_fraction: float = 0.1) -> typin
                                  num_workers=2)
 
     return dataloader_train, dataloader_val, dataloader_test
+
 
 def load_cifar10_augemted(batch_size: int, validation_fraction: float = 0.1) -> typing.List[DataLoader]:
     # Note that transform train will apply the same transform for
@@ -250,11 +242,11 @@ class ConvModel(ExampleModel):
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, 64), # 128
-            nn.BatchNorm1d(64), # 128
+            nn.Linear(self.num_output_features, 64),  # 128
+            nn.BatchNorm1d(64),  # 128
             activation_func(),
 
-            nn.Linear(64, 64), # 128
+            nn.Linear(64, 64),  # 128
             nn.BatchNorm1d(64),
             activation_func(),
 
