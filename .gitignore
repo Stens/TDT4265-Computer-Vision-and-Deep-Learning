@@ -132,3 +132,5 @@ data/
 .vscode/
 *.png
 checkpoints/
+
+Assignments/Assignment_4/code/SSD/datasets/mnist_detection/
