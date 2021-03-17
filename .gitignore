@@ -134,3 +134,4 @@ data/
 checkpoints/
 
 Assignments/Assignment_4/code/SSD/datasets/mnist_detection/
+Assignments/Assignment_4/code/SSD/outputs/*
