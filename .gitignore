@@ -128,10 +128,25 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-data/
+./data/
 .vscode/
 *.png
 checkpoints/
 
+
 Assignments/Assignment_4/code/SSD/datasets/mnist_detection/
 Assignments/Assignment_4/code/SSD/outputs/*
+Assignments/Assignment_4/code/SSD/data/original_mnist/mnist.pkl
+Assignments/Assignment_4/code/SSD/data/original_mnist/t10k-images-idx3-ubyte.gz
+Assignments/Assignment_4/code/SSD/data/original_mnist/t10k-labels-idx1-ubyte.gz
+Assignments/Assignment_4/code/SSD/data/original_mnist/train-images-idx3-ubyte.gz
+Assignments/Assignment_4/code/SSD/data/original_mnist/train-labels-idx1-ubyte.gz
+data/cifar10/cifar-10-batches-py/batches.meta
+data/cifar10/cifar-10-batches-py/data_batch_1
+data/cifar10/cifar-10-batches-py/data_batch_2
+data/cifar10/cifar-10-batches-py/data_batch_3
+data/cifar10/cifar-10-batches-py/data_batch_4
+data/cifar10/cifar-10-batches-py/data_batch_5
+data/cifar10/cifar-10-batches-py/readme.html
+data/cifar10/cifar-10-batches-py/test_batch
+data/cifar10/cifar-10-python.tar.gz
