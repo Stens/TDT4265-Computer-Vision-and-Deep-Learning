@@ -3,7 +3,7 @@ MODEL:
     BACKBONE:
         NAME: 'medium'
         PRETRAINED: False
-        OUT_CHANNELS: [128, 256, 256, 128, 64, 64]
+        OUT_CHANNELS: [128, 256, 256, 128, 64, 64, 64]
         INPUT_CHANNELS: 3
 INPUT:
     IMAGE_SIZE: [300, 300]
@@ -14,7 +14,7 @@ SOLVER:
     MAX_ITER: 6000
     GAMMA: 0.1
     BATCH_SIZE: 16
-    LR: 2e-3
+    LR: 1.2e-3
     WEIGHT_DECAY: 3e-4
 
 OUTPUT_DIR: 'outputs/medium'
