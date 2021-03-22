@@ -36,10 +36,10 @@ def start_train(cfg):
     model = torch_utils.to_cuda(model)
 
     # Select optimizer
-    optimizer = torch.optim.Adam(
+    optimizer = torch.optim.SGD(
         model.parameters(),
         lr=cfg.SOLVER.LR,
-#         momentum=cfg.SOLVER.MOMENTUM,
+        momentum=cfg.SOLVER.MOMENTUM,
         weight_decay=cfg.SOLVER.WEIGHT_DECAY
     )
 

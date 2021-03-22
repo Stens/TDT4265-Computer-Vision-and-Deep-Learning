@@ -24,6 +24,7 @@ class MediumModel(torch.nn.Module):
 
         # Defining the backbone CNN
         module1 = nn.Sequential(
+            # Layer 1
             nn.Conv2d(
                 in_channels=image_channels,
                 out_channels=32,
@@ -32,7 +33,10 @@ class MediumModel(torch.nn.Module):
                 padding=1
             ),
             nn.MaxPool2d(kernel_size=2, stride=2),
+            
             nn.ReLU(),
+            #nn.Dropout(),
+            # Layer 2
             nn.Conv2d(
                 in_channels=32,
                 out_channels=64,
@@ -42,6 +46,8 @@ class MediumModel(torch.nn.Module):
             ),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.ReLU(),
+            #nn.Dropout(),
+            # Layer 3
             nn.Conv2d(
                 in_channels=64,
                 out_channels=128,
@@ -51,6 +57,9 @@ class MediumModel(torch.nn.Module):
             ),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            #nn.Dropout(),
+
+            # Layer 4
             nn.Conv2d(
                 in_channels=128,
                 out_channels=self.output_channels[0],
@@ -58,6 +67,7 @@ class MediumModel(torch.nn.Module):
                 stride=2,
                 padding=1
             ),
+            #nn.Dropout(),
         )
         self.add_module("module1", module1)
 
@@ -82,13 +92,15 @@ class MediumModel(torch.nn.Module):
                 ),
                 nn.ReLU(),
                 nn.BatchNorm2d(conv1_feature_maps),
+                #nn.Dropout(),
                 nn.Conv2d(
                     in_channels=conv1_feature_maps,
                     out_channels=self.output_channels[module_num+1],
                     kernel_size=3,
                     stride=last_conv_stride,
                     padding=last_conv_padding
-                )
+                ),
+                #nn.Dropout(),
             )
             self.add_module("module"+str(module_num+2), temp_module)
 
