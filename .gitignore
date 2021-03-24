@@ -130,7 +130,6 @@ dmypy.json
 
 ./data/
 .vscode/
-*.png
 checkpoints/
 
 
@@ -149,7 +148,4 @@ data/cifar10/cifar-10-batches-py/data_batch_5
 data/cifar10/cifar-10-batches-py/readme.html
 data/cifar10/cifar-10-batches-py/test_batch
 data/cifar10/cifar-10-python.tar.gz
-Assignments/Assignment_4/code/SSD/outputs/basic/log.txt
-Assignments/Assignment_4/code/SSD/outputs/basic/model_final.pth
-Assignments/Assignment_4/code/SSD/outputs/basic/inference/mnist_detection_val/result_2021-03-24_16-08-17.txt
-Assignments/Assignment_4/code/SSD/outputs/basic/tf_logs/events.out.tfevents.1616598489.kristian-Lenovo.8905.0
+Assignments/Assignment_4/code/SSD/outputs/*
