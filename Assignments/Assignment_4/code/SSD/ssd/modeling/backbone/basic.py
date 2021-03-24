@@ -60,35 +60,105 @@ class BasicModel(torch.nn.Module):
         )
         self.add_module("module1", module1)
 
-        # Create module 2-6
-        conv1_feature_maps_list = [128, 256, 128, 128, 128]
-        for module_num, conv1_feature_maps, in enumerate(conv1_feature_maps_list):
-            last_conv_padding = 1
-            last_conv_stride = 2
-            # Use padding = 0 on last conv
-            if module_num+1 == 5:
-                last_conv_padding = 0
-                last_conv_stride = 1
-
-            temp_module = nn.Sequential(
-                nn.ReLU(),
-                nn.Conv2d(
-                    in_channels=self.output_channels[module_num],
-                    out_channels=conv1_feature_maps,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1
-                ),
-                nn.ReLU(),
-                nn.Conv2d(
-                    in_channels=conv1_feature_maps,
-                    out_channels=self.output_channels[module_num+1],
-                    kernel_size=3,
-                    stride=last_conv_stride,
-                    padding=last_conv_padding
-                )
+        module2 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[0],
+                out_channels=128,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=self.output_channels[1],
+                kernel_size=3,
+                stride=2,
+                padding=1
             )
-            self.add_module("module"+str(module_num+2), temp_module)
+        )
+        self.add_module("module2", module2)
+
+        module3 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[1],
+                out_channels=256,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[2],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            )
+        )
+        self.add_module("module3", module3)
+
+        module4 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[2],
+                out_channels=128,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=self.output_channels[3],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            )
+        )
+        self.add_module("module4", module4)
+
+        module5 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[3],
+                out_channels=128,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=self.output_channels[4],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            )
+        )
+        self.add_module("module5", module5)
+
+        module6 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[4],
+                out_channels=128,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=self.output_channels[5],
+                kernel_size=3,
+                stride=1,
+                padding=0
+            )
+        )
+        self.add_module("module6", module6)
 
     def forward(self, x):
         """

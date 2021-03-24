@@ -244,6 +244,7 @@ def plot_precision_recall_curve(precisions, recalls):
     plt.ylabel("Precision")
     plt.xlim([0.8, 1.0])
     plt.ylim([0.8, 1.0])
+    plt.show()  # To get better aspect ratio when saving image
     plt.savefig("precision_recall_curve.png")
 
 
