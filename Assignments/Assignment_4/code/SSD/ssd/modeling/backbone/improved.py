@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class BasicModel(torch.nn.Module):
+class ImprovedModel(torch.nn.Module):
     """
     This is a basic backbone for SSD.
     The feature extractor outputs a list of 6 feature maps, with the sizes:
@@ -44,19 +44,21 @@ class BasicModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=64,
-                out_channels=64,
+                out_channels=128,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
+            nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=64,
+                in_channels=128,
                 out_channels=self.output_channels[0],
                 kernel_size=3,
                 stride=2,
                 padding=1
             ),
+
         )
         self.add_module("module1", module1)
 
@@ -70,6 +72,7 @@ class BasicModel(torch.nn.Module):
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(128),
             nn.Conv2d(
                 in_channels=128,
                 out_channels=self.output_channels[1],
@@ -90,6 +93,7 @@ class BasicModel(torch.nn.Module):
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(256),
             nn.Conv2d(
                 in_channels=256,
                 out_channels=self.output_channels[2],
@@ -104,14 +108,15 @@ class BasicModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=self.output_channels[2],
-                out_channels=128,
+                out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(256),
             nn.Conv2d(
-                in_channels=128,
+                in_channels=256,
                 out_channels=self.output_channels[3],
                 kernel_size=3,
                 stride=2,
@@ -130,6 +135,7 @@ class BasicModel(torch.nn.Module):
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(128),
             nn.Conv2d(
                 in_channels=128,
                 out_channels=self.output_channels[4],
@@ -150,6 +156,7 @@ class BasicModel(torch.nn.Module):
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(128),
             nn.Conv2d(
                 in_channels=128,
                 out_channels=self.output_channels[5],
