@@ -2,13 +2,13 @@
 
 Assignments and project from the course TDT4265 Computer vision and Deep Learning @ NTNU. 
 
-## Assignemnts
+## Assignments
 
-#### Assignemnt 1
+#### Assignment 1
 
 Simple single layer neural network used classifying handwritten digits on the MNIST dataset.
 
-#### Assignemnt 2
+#### Assignment 2
 
 More complex multilayer neural network for classifying handwritten digits on the MNIST dataset.
 
